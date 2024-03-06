@@ -22,9 +22,10 @@ import Icon from "@/components/Icon";
 // ==================
 import type { Menu } from "@/models/index.type";
 import type { ItemType } from "antd/lib/menu/hooks/useItems";
+import { UserMessage } from "@/server/modules/interface/type";
 
 interface Props {
-  data: Menu[]; // 所有的菜单数据
+  data: UserMessage.Menu[]; // 所有的菜单数据
   collapsed: boolean; // 菜单咱开还是收起
 }
 
@@ -57,34 +58,34 @@ export default function MenuCom(props: Props): JSX.Element {
 
   // 工具 - 递归将扁平数据转换为层级数据
   const dataToJson = useCallback(
-    (one: Menu | undefined, data: Menu[]): Menu[] | undefined => {
+    (one: UserMessage.Menu | undefined, data: UserMessage.Menu[]): UserMessage.Menu[] | undefined => {
       let kids;
       if (!one) {
         // 第1次递归
-        kids = data.filter((item: Menu) => !item.parent);
+        kids = data.filter((item: UserMessage.Menu) => !item.ParentMenuID);
       } else {
-        kids = data.filter((item: Menu) => item.parent === one.id);
+        kids = data.filter((item: UserMessage.Menu) => item.ParentMenuID === one.MenuID);
       }
-      kids.forEach((item: Menu) => (item.children = dataToJson(item, data)));
+      kids.forEach((item: UserMessage.Menu) => (item.children = dataToJson(item, data)));
       return kids.length ? kids : undefined;
     },
     []
   );
 
   // 构建树结构
-  const makeTreeDom = useCallback((data: Menu[]): any => {
-    return data.map((item: Menu) => {
+  const makeTreeDom = useCallback((data: UserMessage.Menu[]): any => {
+    return data.map((item: UserMessage.Menu) => {
       if (item.children) {
         return {
-          key: item.url,
+          key: item.MenuLink,
           label:
-            !item.parent && item.icon ? (
+            !item.ParentMenuID && item.Menu_icon ? (
               <span>
-                <Icon type={item.icon} />
-                <span>{item.title}</span>
+                <Icon type={item.Menu_icon} />
+                <span>{item.MenuName}</span>
               </span>
             ) : (
-              item.title
+              item.MenuName
             ),
           children: makeTreeDom(item.children),
         };
@@ -92,11 +93,11 @@ export default function MenuCom(props: Props): JSX.Element {
         return {
           label: (
             <>
-              {!item.parent && item.icon ? <Icon type={item.icon} /> : null}
-              <span>{item.title}</span>
+              {!item.ParentMenuID && item.Menu_icon ? <Icon type={item.Menu_icon} /> : null}
+              <span>{item.MenuName}</span>
             </>
           ),
-          key: item.url,
+          key: item.MenuLink,
         };
       }
     });
@@ -108,12 +109,12 @@ export default function MenuCom(props: Props): JSX.Element {
 
   /** 处理原始数据，将原始数据处理为层级关系 **/
   const treeDom: ItemType[] = useMemo(() => {
-    const d: Menu[] = cloneDeep(props.data);
+    const d: UserMessage.Menu[] = cloneDeep(props.data);
     // 按照sort排序
     d.sort((a, b) => {
-      return a.sorts - b.sorts;
+      return a.Sort - b.Sort;
     });
-    const sourceData: Menu[] = dataToJson(undefined, d) || [];
+    const sourceData: UserMessage.Menu[] = dataToJson(undefined, d) || [];
     const treeDom = makeTreeDom(sourceData);
     return treeDom;
   }, [props.data, dataToJson, makeTreeDom]);
@@ -129,7 +130,7 @@ export default function MenuCom(props: Props): JSX.Element {
       <div className={props.collapsed ? "menuLogo hide" : "menuLogo"}>
         <Link to="/">
           <img src={ImgLogo} />
-          <div>React-Admin</div>
+          <div>星旺酒店</div>
         </Link>
       </div>
       <MenuAntd

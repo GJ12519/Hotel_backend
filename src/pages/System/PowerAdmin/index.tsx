@@ -68,6 +68,7 @@ import type { EventDataNode, DataNode } from "rc-tree/lib/interface";
 // CSS
 // ==================
 import "./index.less";
+import { UserMessage } from "@/server/modules/interface/type";
 
 // ==================
 // 本组件
@@ -133,9 +134,9 @@ function PowerAdminContainer() {
       let kids: TreeSourceData[];
       if (!one) {
         // 第1次递归
-        kids = data.filter((item: TreeSourceData) => !item.parent);
+        kids = data.filter((item: TreeSourceData) => !item.ParentMenuID);
       } else {
-        kids = data.filter((item: TreeSourceData) => item.parent === one.id);
+        kids = data.filter((item: TreeSourceData) => item.ParentMenuID === one.MenuID);
       }
       kids.forEach(
         (item: TreeSourceData) => (item.children = dataToJson(item, data))
@@ -146,7 +147,7 @@ function PowerAdminContainer() {
   );
 
   // 工具 - 赋值Key
-  const makeKey = useCallback((data: Menu[]) => {
+  const makeKey = useCallback((data: UserMessage.Menu[]) => {
     const newData: TreeSourceData[] = [];
     for (let i = 0; i < data.length; i++) {
       const item: any = { ...data[i] };
@@ -155,7 +156,7 @@ function PowerAdminContainer() {
       }
       const treeItem: TreeSourceData = {
         ...(item as TreeSourceData),
-        key: item.id,
+        key: item.MenuID,
       };
       newData.push(treeItem);
     }
@@ -196,16 +197,16 @@ function PowerAdminContainer() {
     setRolesCheckboxChose(
       data && data.id
         ? roles
-            .filter((item) => {
-              const theMenuPower = item.menuAndPowers?.find(
-                (item2) => item2.menuId === data.menu
-              );
-              if (theMenuPower) {
-                return theMenuPower.powers.includes(data.id);
-              }
-              return false;
-            })
-            .map((item) => item.id)
+          .filter((item) => {
+            const theMenuPower = item.menuAndPowers?.find(
+              (item2) => item2.menuId === data.menu
+            );
+            if (theMenuPower) {
+              return theMenuPower.powers.includes(data.id);
+            }
+            return false;
+          })
+          .map((item) => item.id)
         : []
     );
     setTimeout(() => {
@@ -513,9 +514,8 @@ function PowerAdminContainer() {
       </div>
       {/** 查看&新增&修改用户模态框 **/}
       <Modal
-        title={`${
-          { add: "新增", up: "修改", see: "查看" }[modal.operateType]
-        }权限: ${treeSelect.title}->${modal.nowData?.title ?? ""}`}
+        title={`${{ add: "新增", up: "修改", see: "查看" }[modal.operateType]
+          }权限: ${treeSelect.title}->${modal.nowData?.title ?? ""}`}
         open={modal.modalShow}
         onOk={onOk}
         onCancel={onClose}

@@ -7,13 +7,17 @@ export type { UserBasicInfoParam, Res } from "@/models/index.type";
 // 列表table的数据类型
 export type TableRecordData = {
   key?: number;
-  id: number;
-  serial: number; // 序号
-  username: string; // 用户名
-  password: string; // 密码
-  phone: string | number; // 手机
-  email: string; // 邮箱
-  desc: string; // 描述
+  EmployeeID: string; // 用户ID
+  Gender: string; // 性别
+  BirthDay: string; // 出生日期
+  HireDate: string; // 入职日期
+  IDCard: string; // 身份证
+  serial?: number; // 序号
+  EmployeeName: string; // 用户名
+  Password: string; // 密码
+  Phone: string | number; // 手机
+  email?: string; // 邮箱
+  note: string; // 描述
   conditions: number; // 是否启用 1启用 -1禁用
   control?: number; // 控制，传入的ID
   roles?: number[]; // 拥有的所有权限ID

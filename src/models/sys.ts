@@ -345,6 +345,7 @@ export default {
       conditions?: number;
     }) {
       try {
+        console.log('parmas', params);
         const res: Res = await axios.get(
           `/api/getUserList?${qs.stringify(params)}`
         );

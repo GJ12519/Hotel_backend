@@ -14,7 +14,7 @@
     "@loadable/component": "^5.15.3",
     "@rematch/core": "^2.2.0",
     "antd": "4.x",
-    "axios": "^1.4.0",
+    "axios": "^1.6.7",
     "lodash": "^4.17.21",
     "normalize.css": "^8.0.1",
     "qs": "^6.11.2",

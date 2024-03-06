@@ -16,6 +16,7 @@ import { Form, Input, Button, Checkbox, message } from "antd";
 import { UserOutlined, KeyOutlined } from "@ant-design/icons";
 import CanvasBack from "@/components/CanvasBack";
 import LogoImg from "@/assets/logo.png";
+import { userlogin } from "@/server/modules/users_login";
 
 // ==================
 // 类型声明
@@ -147,44 +148,47 @@ function LoginContainer(): JSX.Element {
     try {
       const values = await form.validateFields();
       setLoading(true);
+      /* 类型断言 */
       const res = await dispatch.app.onLogin({
         username: values.username,
         password: values.password,
-      });
-      console.log("res的值", res);
-
-      if (res) {
-        // await dispatch.app.setUserInfo(res.data);
-
+      }) as any;
+      if (res && res.status == 200) {
         message.success("登录成功");
-
         navigate("/");
         // 是否记住密码
         if (rememberPassword) {
-          localStorage.setItem(
-            "userLoginInfo",
+          localStorage.setItem("userLoginInfo",
             JSON.stringify({
               username: values.username,
               password: tools.compile(values.password), // 密码简单加密一下再存到localStorage
             })
-          ); // 保存用户名和密码
+          );
         } else {
           localStorage.removeItem("userLoginInfo");
         }
-        /** 将这些信息加密后存入sessionStorage,并存入store **/
-        //   sessionStorage.setItem(
-        //     "userinfo",
-        //     tools.compile(JSON.stringify(res.data))
-        //   );
-        //   await dispatch.app.setUserInfo(res.data);
-        //   console.log("res data的信息", res.data);
-        //   navigate("/"); // 跳转到主页
-        // } else {
-        //   // message.error(res?.message ?? "登录失败");
-        //   setLoading(false);
+      } else {
+        message.error(res?.message ?? "登录失败")
       }
+      setLoading(false);
+
+      /** 将这些信息加密后存入sessionStorage,并存入store **/
+      //   sessionStorage.setItem(
+      //     "userinfo",
+      //     tools.compile(JSON.stringify(res.data))
+      //   );
+      //   await dispatch.app.setUserInfo(res.data);
+      //   console.log("res data的信息", res.data);
+      //   navigate("/"); // 跳转到主页
+      // } else {
+      //   // message.error(res?.message ?? "登录失败");
+
     } catch (e) {
       // 验证未通过
+      message.error("查询失败，请重试！！！");
+      console.log(e);
+
+      setLoading(false);
     }
   };
 

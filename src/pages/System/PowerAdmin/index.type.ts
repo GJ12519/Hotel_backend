@@ -2,6 +2,7 @@
 
 import { PowerTreeDefault } from "@/components/TreeChose/PowerTreeTable";
 import { Power } from "@/models/index.type";
+import { UserMessage } from "@/server/modules/interface/type";
 
 export type {
   Menu,
@@ -36,15 +37,16 @@ export type SearchInfo = {
   conditions: number | undefined; // 状态
 };
 
-export interface TreeSourceData {
-  id: number; // ID,添加时可以没有id
-  key: string | number;
-  title: string; // 标题
-  icon: string; // 图标
-  url: string; // 链接路径
-  parent: number | null; // 父级ID
-  desc: string; // 描述
-  sorts: number; // 排序编号
-  conditions: number; // 状态，1启用，-1禁用
-  children?: TreeSourceData[]; // 子菜单
+export interface TreeSourceData extends UserMessage.Menu {
+  // id: number; // ID,添加时可以没有id
+  // key: string | number;
+  // title: string; // 标题
+  // icon: string; // 图标
+  // url: string; // 链接路径
+  // parent: number | null; // 父级ID
+  // desc: string; // 描述
+  // sorts: number; // 排序编号
+  // conditions: number; // 状态，1启用，-1禁用
+  // children?: TreeSourceData[]; // 子菜单
+  Key: string | number;
 }

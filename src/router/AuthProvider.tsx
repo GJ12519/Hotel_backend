@@ -6,8 +6,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 
 import type { Menu } from "@/models/index.type";
+import { UserMessage } from "@/server/modules/interface/type";
 
 import tools from "@/util/tools";
+import { any } from "prop-types";
 
 interface Props {
   children: JSX.Element;
@@ -27,6 +29,7 @@ export function AuthNoLogin(props: Props) {
 // 已登录的用户，不应该进入login页，直接重定向到主页
 export function AuthWithLogin(props: Props) {
   const userinfo = useSelector((state: RootState) => state.app.userinfo);
+  console.log('user', userinfo.userBasicInfo);
 
   if (userinfo.userBasicInfo) {
     return <Navigate to="/home" replace />;
@@ -38,18 +41,19 @@ export function AuthWithLogin(props: Props) {
 export function AuthNoPower(props: Props) {
   const location = useLocation();
   const userinfo = useSelector((state: RootState) => state.app.userinfo);
+  console.log("999", userinfo);
 
   // 判断当前用户是否有该路由权限，如果没有就跳转至401页
   const isHavePower = useMemo(() => {
-    let menus: Menu[] = [];
+    let menus: UserMessage.Menu[] = [];
     if (userinfo.menus && userinfo.menus.length) {
-      menus = userinfo.menus;
+      menus = userinfo.menus as any
     } else if (sessionStorage.getItem("userinfo")) {
       menus = JSON.parse(
         tools.uncompile(sessionStorage.getItem("userinfo") || "[]")
       ).menus;
     }
-    const m: string[] = menus.map((item) => item.url); // 当前用户拥有的所有菜单
+    const m: string[] = menus.map((item) => item.MenuLink); // 当前用户拥有的所有菜单
 
     if (m.includes(location.pathname)) {
       return true;

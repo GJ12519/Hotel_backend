@@ -1,4 +1,4 @@
-/** User 系统管理/用户管理 **/
+/** User 系统管理/`用户`管理 **/
 
 // ==================
 // 所需的第三方库
@@ -122,6 +122,8 @@ function UserAdminContainer(): JSX.Element {
   const getAllRolesData = async (): Promise<void> => {
     try {
       const res = await dispatch.sys.getAllRoles();
+      console.log('res11', res);
+
       if (res && res.status === 200) {
         setRole({
           roleData: res.data,
@@ -150,6 +152,8 @@ function UserAdminContainer(): JSX.Element {
     setLoading(true);
     try {
       const res = await dispatch.sys.getUserList(tools.clearNull(params));
+      console.log('所有的用户信息', res);
+
       if (res && res.status === 200) {
         setData(res.data.list);
         setPage({

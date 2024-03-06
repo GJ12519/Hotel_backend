@@ -64,11 +64,16 @@ export interface UserInfo {
 
 // 用户的基本信息
 export interface UserBasicInfo {
-  id: string; // ID
-  username: string; // 用户名
-  password: string | number; // 密码
-  phone: string | number; // 手机
-  email: string; // 邮箱
+  EmployeeID: string; // ID
+  EmployeeName: string; // 用户名
+  Password: string | number; // 密码
+  Phone: string | number; // 手机
+  Gender: string; // 性别
+  BirthDate: string; // 出生日期
+  HireDate: string; // 入职日期
+  Position?: string; //岗位
+  Address?: string; // 住址
+  IDCard: string | number; // 身份证
   desc: string; // 描述
   conditions: number; // 状态 1启用，-1禁用
   roles: number[]; // 拥有的所有角色ID
@@ -105,8 +110,8 @@ export interface SysState {
 // 接口的返回值类型
 export type Res =
   | {
-      status: number; // 状态，200成功
-      data?: any; // 返回的数据
-      message?: string; // 返回的消息
-    }
+    status: number; // 状态，200成功
+    data?: any; // 返回的数据
+    message?: string; // 返回的消息
+  }
   | undefined;
