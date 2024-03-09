@@ -9,7 +9,6 @@ export const userlogin = (data: Login.LoginForm) =>
 export const getrole = (data: Login.LoginGetRole) =>
     hyRequest.post({ url: "/login/getrole", data })
 
-
 /* 根据角色id获取菜单信息 */
 export const getmenu = (data: Login.LoginGetMenu) =>
     hyRequest.post({ url: "/login/getmenu", data })

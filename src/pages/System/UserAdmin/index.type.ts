@@ -8,10 +8,12 @@ export type { UserBasicInfoParam, Res } from "@/models/index.type";
 export type TableRecordData = {
   key?: number;
   EmployeeID: string; // 用户ID
+  name: string; // 姓名
   Gender: string; // 性别
   BirthDay: string; // 出生日期
   HireDate: string; // 入职日期
   IDCard: string; // 身份证
+  Address: string; // 地址
   serial?: number; // 序号
   EmployeeName: string; // 用户名
   Password: string; // 密码
@@ -21,6 +23,7 @@ export type TableRecordData = {
   conditions: number; // 是否启用 1启用 -1禁用
   control?: number; // 控制，传入的ID
   roles?: number[]; // 拥有的所有权限ID
+  Position: string; // 职位
 };
 
 export type Page = {

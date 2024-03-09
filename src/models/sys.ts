@@ -20,6 +20,8 @@ import {
   UserBasicInfoParam,
 } from "./index.type";
 
+import { getuserlist } from "@/server/modules/getalluser";
+
 const defaultState: SysState = {
   menus: [], // 所有的菜单信息（用于菜单管理，无视权限）
   roles: [], // 所有的角色信息（用于Model赋予项，无视权限）
@@ -345,10 +347,9 @@ export default {
       conditions?: number;
     }) {
       try {
-        console.log('parmas', params);
-        const res: Res = await axios.get(
-          `/api/getUserList?${qs.stringify(params)}`
-        );
+        const res: Res = await getuserlist(params) as any
+        console.log("我的res", res);
+
         return res;
       } catch (err) {
         message.error("网络错误，请重试");

@@ -86,7 +86,7 @@ function UserAdminContainer(): JSX.Element {
   // 分页相关参数
   const [page, setPage] = useSetState<Page>({
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
 
@@ -122,7 +122,6 @@ function UserAdminContainer(): JSX.Element {
   const getAllRolesData = async (): Promise<void> => {
     try {
       const res = await dispatch.sys.getAllRoles();
-      console.log('res11', res);
 
       if (res && res.status === 200) {
         setRole({
@@ -151,15 +150,18 @@ function UserAdminContainer(): JSX.Element {
     };
     setLoading(true);
     try {
-      const res = await dispatch.sys.getUserList(tools.clearNull(params));
-      console.log('所有的用户信息', res);
+      const res = await dispatch.sys.getUserList(tools.clearNull(params)) as any
+      console.log('所有用户的信息', res?.data);
+      const res11 = res?.data?.results?.result
 
-      if (res && res.status === 200) {
-        setData(res.data.list);
+      if (res && res.data.status === 200) {
+        console.log(res11, 111);
+
+        setData(res.data.results.result);
         setPage({
           pageNum: page.pageNum,
           pageSize: page.pageSize,
-          total: res.data.total,
+          total: res.data.results.total,
         });
       } else {
         message.error(res?.message ?? "数据获取失败");
@@ -347,7 +349,8 @@ function UserAdminContainer(): JSX.Element {
 
   // 表格页码改变
   const onTablePageChange = (pageNum: number, pageSize: number): void => {
-    onGetData({ pageNum, pageSize });
+    console.log(pageNum, pageSize);
+    onGetData({ pageNum: pageNum * pageSize - pageSize + 1, pageSize });
   };
 
   // ==================
@@ -357,29 +360,29 @@ function UserAdminContainer(): JSX.Element {
   // table字段
   const tableColumns = [
     {
-      title: "序号",
-      dataIndex: "serial",
-      key: "serial",
+      title: "ID",
+      dataIndex: "EmployeeID",
+      key: "EmployeeID",
+    },
+    {
+      title: "姓名",
+      dataIndex: "name",
+      key: "name",
     },
     {
       title: "用户名",
-      dataIndex: "username",
-      key: "username",
+      dataIndex: "EmployeeName",
+      key: "EmployeeName",
     },
     {
       title: "电话",
-      dataIndex: "phone",
-      key: "phone",
+      dataIndex: "Phone",
+      key: "Phone",
     },
     {
-      title: "邮箱",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "描述",
-      dataIndex: "desc",
-      key: "desc",
+      title: "职位",
+      dataIndex: "Position",
+      key: "Position",
     },
     {
       title: "状态",
@@ -398,7 +401,7 @@ function UserAdminContainer(): JSX.Element {
       width: 200,
       render: (v: null, record: TableRecordData) => {
         const controls = [];
-        const u = userinfo.userBasicInfo || { id: -1 };
+        const u = userinfo.userBasicInfo || { EmployeeID: -1 };
         p.includes("user:query") &&
           controls.push(
             <span
@@ -435,14 +438,14 @@ function UserAdminContainer(): JSX.Element {
               </Tooltip>
             </span>
           );
-
+ 
         p.includes("user:del") &&
-          u.id !== record.id &&
+          u.EmployeeID !== record.EmployeeID &&
           controls.push(
             <Popconfirm
               key="3"
               title="确定删除吗?"
-              onConfirm={() => onDel(record.id)}
+              onConfirm={() => onDel(record.EmployeeID as any)}
               okText="确定"
               cancelText="取消"
             >
@@ -468,20 +471,24 @@ function UserAdminContainer(): JSX.Element {
 
   // table列表所需数据
   const tableData = useMemo(() => {
+
     return data.map((item, index) => {
+      console.log("data1111", { serial: index + 1 + (page.pageNum - 1) * page.pageSize, }
+      );
+
       return {
         key: index,
-        id: item.id,
+        name: item.name,
+        EmployeeID: item.EmployeeID,
         serial: index + 1 + (page.pageNum - 1) * page.pageSize,
-        username: item.username,
-        password: item.password,
-        phone: item.phone,
+        EmployeeName: item.EmployeeName,
+        Password: item.Password,
+        Phone: item.Phone,
         email: item.email,
-        desc: item.desc,
         conditions: item.conditions,
-        control: item.id,
-        roles: item.roles,
-      };
+        control: item.conditions,
+        Position: item.Position
+      }
     });
   }, [page, data]);
 
@@ -543,7 +550,6 @@ function UserAdminContainer(): JSX.Element {
             total: page.total,
             current: page.pageNum,
             pageSize: page.pageSize,
-            showQuickJumper: true,
             showTotal: (t) => `共 ${t} 条数据`,
             onChange: onTablePageChange,
           }}

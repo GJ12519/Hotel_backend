@@ -135,7 +135,6 @@ export default {
       }
       // console.log(rootState.app.userinfo);
 
-
       // const res2: Res | undefined = await dispatch.sys.getRoleById({
       //   id: userinfo.roles.map((item) => item.id),
       // });

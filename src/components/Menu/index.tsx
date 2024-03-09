@@ -51,6 +51,8 @@ export default function MenuCom(props: Props): JSX.Element {
 
   // 菜单被选择
   const onSelect = (e: any) => {
+    console.log('ecsjuihjkadf', e);
+
     if (e?.key) {
       navigate(e.key);
     }
@@ -67,6 +69,9 @@ export default function MenuCom(props: Props): JSX.Element {
         kids = data.filter((item: UserMessage.Menu) => item.ParentMenuID === one.MenuID);
       }
       kids.forEach((item: UserMessage.Menu) => (item.children = dataToJson(item, data)));
+
+      // console.log(kids);
+
       return kids.length ? kids : undefined;
     },
     []
