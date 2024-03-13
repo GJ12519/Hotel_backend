@@ -438,7 +438,7 @@ function UserAdminContainer(): JSX.Element {
               </Tooltip>
             </span>
           );
- 
+
         p.includes("user:del") &&
           u.EmployeeID !== record.EmployeeID &&
           controls.push(
@@ -473,8 +473,6 @@ function UserAdminContainer(): JSX.Element {
   const tableData = useMemo(() => {
 
     return data.map((item, index) => {
-      console.log("data1111", { serial: index + 1 + (page.pageNum - 1) * page.pageSize, }
-      );
 
       return {
         key: index,

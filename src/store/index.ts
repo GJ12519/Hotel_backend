@@ -4,13 +4,15 @@ import { init, Models, RematchDispatch, RematchRootState } from "@rematch/core";
 
 import app from "@/models/app";
 import sys from "@/models/sys";
+import guster from "@/models/guster";
 
 export interface RootModel extends Models<RootModel> {
   app: typeof app;
   sys: typeof sys;
+  guster: typeof guster;
 }
 
-const rootModel: RootModel = { app, sys };
+const rootModel: RootModel = { app, sys, guster };
 const store = init({
   models: rootModel,
   redux: {

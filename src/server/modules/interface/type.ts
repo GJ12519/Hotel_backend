@@ -68,3 +68,20 @@ export namespace UserMessage {
         PremissionName: string
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace GusMsg {
+    export interface List {
+        Gus_id: string | null,
+        Gus_password: string;
+        Gus_name: string,
+        Email?: string,
+        Phone: number,
+        IDCard: string,
+        Address: string,
+        createtime: string,
+        updatetime: string,
+        conditions: number,
+        note: string
+    }
+}

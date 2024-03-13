@@ -1,3 +1,7 @@
+import {
+  GusMsg
+} from "@/server/modules/interface/type"
+
 // 菜单添加，修改时的参数类型
 export interface MenuParam {
   id?: number; // ID,添加时可以没有id
@@ -81,12 +85,14 @@ export interface UserBasicInfo {
 
 // 添加修改用户时参数的数据类型
 export interface UserBasicInfoParam {
-  id?: number; // ID
-  username: string; // 用户名
-  password: string | number; // 密码
-  phone?: string | number; // 手机
+  ID: string;
+  IDCard?: string; // 身份证
+  sex: string; // 性别
+  name: string; // 用户名
+  Password: string | number; // 密码
+  Phone?: string | number; // 手机
   email?: string; // 邮箱
-  desc?: string; // 描述
+  note?: string; // 描述
   conditions?: number; // 状态 1启用，-1禁用
 }
 
@@ -107,6 +113,10 @@ export interface SysState {
   powerTreeData: PowerTree[];
 }
 
+export interface GusState {
+  gusmsg: GusMsg.List[];
+}
+
 // 接口的返回值类型
 export type Res =
   | {
@@ -115,3 +125,5 @@ export type Res =
     message?: string; // 返回的消息
   }
   | undefined;
+
+

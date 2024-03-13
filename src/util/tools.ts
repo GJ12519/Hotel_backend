@@ -95,6 +95,48 @@ const tools = {
   },
 
   /**
+ * 正则 身份证验证
+ * @param str - 待处理的字符串
+ * **/
+  checkIDCard(str: string | number): boolean {
+    // 正则表达式匹配15位或18位身份证号码  
+    // 15位：全部数字  
+    // 18位：前17位数字，最后一位可以是数字或X（不区分大小写）  
+    const pattern = /^\d{15}|\d{17}(\d|X|x)$/;
+
+    // 使用test方法进行匹配  
+    if (!pattern.test(str)) {
+      return false;
+    }
+
+    // 如果是15位身份证，直接返回true  
+    if (str.length === 15) {
+      return true;
+    }
+
+    // 如果是18位身份证，需要进一步验证最后一位校验码  
+    if (str.length === 18) {
+      // 提取前17位和最后一位校验码  
+      const body = str.substring(0, 17);
+      const checkDigit = str.charAt(17).toUpperCase();
+
+      // 18位身份证的校验码计算  
+      const weights = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+      const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+
+      let sum = 0;
+      for (let i = 0; i < body.length; i++) {
+        sum += parseInt(body.charAt(i)) * weights[i];
+      }
+
+      return checkCodes[sum % 11] === checkDigit;
+    }
+
+    // 如果既不是15位也不是18位，返回false  
+    return false;
+  },
+
+  /**
    * 正则 邮箱验证
    * @param str - 待处理的字符串
    * **/

@@ -136,18 +136,18 @@ function RouterCom(): JSX.Element {
           }
         />
         <Route
-          path="reception/room"
-          element={
-            <AuthNoPower>
-              <UserAdmin />
-            </AuthNoPower>
-          }
-        />
-        <Route
           path="reception/custom"
           element={
             <AuthNoPower>
               <CustomAdmin />
+            </AuthNoPower>
+          }
+        />
+        <Route
+          path="reception/room"
+          element={
+            <AuthNoPower>
+              <UserAdmin />
             </AuthNoPower>
           }
         />

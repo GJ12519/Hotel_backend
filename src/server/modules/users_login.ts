@@ -13,6 +13,6 @@ export const getrole = (data: Login.LoginGetRole) =>
 export const getmenu = (data: Login.LoginGetMenu) =>
     hyRequest.post({ url: "/login/getmenu", data })
 
-/* 根据角色id获取菜单信息 */
+/* 根据角色id获取权限信息 */
 export const getpower = (data: Login.LoginGetMenu) =>
     hyRequest.post({ url: "/login/getpower", data })

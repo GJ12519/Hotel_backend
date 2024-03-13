@@ -374,6 +374,8 @@ export default {
      * 修改用户
      * **/
     async upUser(params: UserBasicInfoParam) {
+      console.log("params", params);
+
       try {
         const res: Res = await axios.post("/api/upUser", params);
         return res;
