@@ -150,7 +150,7 @@ function UserAdminContainer(): JSX.Element {
     };
     setLoading(true);
     try {
-      const res = await dispatch.sys.getUserList(tools.clearNull(params)) as any
+      const res = await dispatch.sys.getUserList(tools.clearNull(params))
       console.log('所有用户的信息', res?.data);
       const res11 = res?.data?.results?.result
 
@@ -158,6 +158,7 @@ function UserAdminContainer(): JSX.Element {
         console.log(res11, 111);
 
         setData(res.data.results.result);
+
         setPage({
           pageNum: page.pageNum,
           pageSize: page.pageSize,

@@ -16,6 +16,7 @@
     "antd": "4.x",
     "axios": "^1.6.7",
     "lodash": "^4.17.21",
+    "moment": "^2.30.1",
     "normalize.css": "^8.0.1",
     "qs": "^6.11.2",
     "react": "^18.2.0",
@@ -25,7 +26,8 @@
     "react-use": "^17.4.0",
     "react-vcode": "1.0.11",
     "redux": "^4.2.1",
-    "redux-logger": "^3.0.6"
+    "redux-logger": "^3.0.6",
+    "styled-components": "^6.1.8"
   },
   "devDependencies": {
     "@types/loadable__component": "^5.13.4",

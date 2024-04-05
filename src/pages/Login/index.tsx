@@ -36,6 +36,7 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 // CSS
 // ==================
 import "./index.less";
+import RC from "@/assets/b.jpg"
 
 // ==================
 // 本组件
@@ -148,11 +149,10 @@ function LoginContainer(): JSX.Element {
     try {
       const values = await form.validateFields();
       setLoading(true);
-      /* 类型断言 */
       const res = await dispatch.app.onLogin({
         username: values.username,
         password: values.password,
-      }) as any;
+      });
       if (res && res.status == 200) {
         message.success("登录成功");
         navigate("/");
@@ -171,18 +171,6 @@ function LoginContainer(): JSX.Element {
         message.error(res?.message ?? "登录失败")
       }
       setLoading(false);
-
-      /** 将这些信息加密后存入sessionStorage,并存入store **/
-      //   sessionStorage.setItem(
-      //     "userinfo",
-      //     tools.compile(JSON.stringify(res.data))
-      //   );
-      //   await dispatch.app.setUserInfo(res.data);
-      //   console.log("res data的信息", res.data);
-      //   navigate("/"); // 跳转到主页
-      // } else {
-      //   // message.error(res?.message ?? "登录失败");
-
     } catch (e) {
       // 验证未通过
       message.error("查询失败，请重试！！！");
@@ -208,13 +196,14 @@ function LoginContainer(): JSX.Element {
   return (
     <div className="page-login">
       <div className="canvasBox">
-        <CanvasBack row={12} col={8} />
+        {/* <CanvasBack row={12} col={8} /> */}
+        <img className="img1" src={RC} alt="" />
       </div>
       <div className={show ? "loginBox show" : "loginBox"}>
         <Form form={form}>
           <div className="title">
             <img src={LogoImg} alt="logo" />
-            <span>酒店管理系统</span>
+            <span>酒店客房管理系统</span>
           </div>
           <div>
             <Form.Item

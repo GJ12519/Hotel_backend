@@ -117,6 +117,17 @@ export interface GusState {
   gusmsg: GusMsg.List[];
 }
 
+// values
+export type ValuesType = {
+  stime: string | null,
+  etime: string | null,
+  IDCard: string | null,
+  conditions: number,
+  phone: number,
+  room: number,
+  name: string
+}
+
 // 接口的返回值类型
 export type Res =
   | {

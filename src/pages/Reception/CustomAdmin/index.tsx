@@ -1,4 +1,4 @@
-/** User 系统管理/`用户`管理 **/
+/** User 系统管理/`客户`管理 **/
 
 // ==================
 // 所需的第三方库
@@ -70,12 +70,11 @@ import { RootState, Dispatch } from "@/store";
 // CSS
 // ==================
 import "./index.less";
-import { log } from "console";
 
 // ==================
 // 本组件
 // ==================
-function UserAdminContainer(): JSX.Element {
+function GusAdminContainer(): JSX.Element {
     const dispatch = useDispatch<Dispatch>();
     const userinfo = useSelector((state: RootState) => state.app.userinfo);
     const p = useSelector((state: RootState) => state.app.powersCode);
@@ -680,4 +679,4 @@ function UserAdminContainer(): JSX.Element {
     );
 }
 
-export default UserAdminContainer;
+export default GusAdminContainer;

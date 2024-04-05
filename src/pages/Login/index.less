@@ -4,6 +4,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   .canvasBox {
     position: absolute;
     top: 0;
@@ -11,7 +12,14 @@
     width: 100%;
     height: 100%;
     z-index: 0;
+
+    .img1 {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   }
+
   .loginBox {
     position: relative;
     margin-top: 10vh;
@@ -22,43 +30,51 @@
     transform: scale(1.2, 1.2);
     opacity: 0;
     transition: all 300ms;
+
     &.show {
       transform: scale(1, 1);
       opacity: 1;
     }
+
     .title {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 40px;
       font-size: 36px;
-      font-weight: 600;
+      // font-weight: 7000;
       color: #fff;
-      letter-spacing: 1px;
+      // letter-spacing: 1px;
+
       img {
         height: 56px;
         margin-right: 10px;
       }
     }
+
     .vcode {
       float: right;
       border: solid 1px #d9d9d9;
       border-radius: 4px;
     }
+
     .remember {
       color: #fff;
     }
+
     .submit-btn {
       float: right;
       width: 270px;
     }
   }
+
   .login-back {
     width: 100%;
     height: 100%;
     position: fixed;
     bottom: 0;
     z-index: -1;
+
     canvas {
       width: 100%;
       height: 100%;
