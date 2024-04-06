@@ -95,7 +95,7 @@ function RoomAdminContainer(): JSX.Element {
         switch (e) {
             case 'Details':
                 setModal({
-                    modalShow: true,
+                    modalShow: false,
                     operateType: "Details"
                 })
                 message.info('正在完善中......')
@@ -107,12 +107,17 @@ function RoomAdminContainer(): JSX.Element {
                     if (Room[n].isable === 2) {
                         message.info('已有客户入住,请换一间预定')
                     } else {
+                        const { stime, etime } = Room[n]
+
+                        const aa = moment.utc(stime).local()
+                        const bb = moment.utc(etime).local()
                         setTimeout(() => {
                             form.setFieldsValue({
                                 name: Room[n].Gus_name,
                                 IDCard: Room[n].IDCard,
                                 phone: Room[n].Phone,
-                                room: Room[n].room_id
+                                room: Room[n].room_id,
+                                btime: [aa, bb]
                             });
                         });
                         setModal({
@@ -139,12 +144,19 @@ function RoomAdminContainer(): JSX.Element {
             case 'Checkin':     // 入住
                 if (Room[n].userID) {
                     console.log('执行了', Room[n]);
+
+                    const { stime, etime } = Room[n]
+
+                    const aa = moment.utc(stime).local()
+                    const bb = moment.utc(etime).local()
+
                     setTimeout(() => {
                         form.setFieldsValue({
                             name: Room[n].Gus_name,
                             IDCard: Room[n].IDCard,
                             phone: Room[n].Phone,
-                            room: Room[n].room_id
+                            room: Room[n].room_id,
+                            btime: [aa, bb]
                         });
                     });
                     setModal({
@@ -179,29 +191,13 @@ function RoomAdminContainer(): JSX.Element {
         }
     }
 
-
-    // const DetailsClick = () => {
-    //     console.log('details');
-    // }
-
-    // const ReserveClick = async (n: number) => {
-    //     console.log('预定');
-
-    // }
-
-    // const CleanClick = () => {
-    //     console.log('Clean');
-    // }
-
-    // const CheckinClick = () => {
-    //     console.log('Checkin');
-    // }
-
     // 模态框确认
     const onOK = async () => {
         // 获取values并对数据进行处理
         const values = await form.validateFields();
-        console.log(values.btime);
+        console.log('2222', values.btime);
+        console.log('1111');
+
 
         const Atime = {
             stime: moment(values.btime[0]._d).format('YYYY-MM-DD HH:mm:ss'),
@@ -370,6 +366,7 @@ function RoomAdminContainer(): JSX.Element {
                     >
                         <RangePicker
                             disabled={false}
+                        // defaultValue={}
                         // value={Room[num].}
                         />
                     </Form.Item>
@@ -385,7 +382,7 @@ function RoomAdminContainer(): JSX.Element {
                                 {/* 确认预定 */}
                             </Option>
                             <Option key={-1} value={-1}>
-                                {modal.operateType === "Reserve" ? "取消预定" : "取消入住"}
+                                {modal.operateType === "Reserve" ? "取消预定" : "退房"}
                                 {/* 取消预定 */}
                             </Option>
                         </Select>

@@ -21,6 +21,6 @@ export const reserve = (data: ValuesType) => {
 }
 
 // 入住
-export const checkin = () => {
-    return hyRequest.post({ url: '' })
+export const checkin = (data: ValuesType) => {
+    return hyRequest.post({ url: '/roomadmin/checkin', data })
 }

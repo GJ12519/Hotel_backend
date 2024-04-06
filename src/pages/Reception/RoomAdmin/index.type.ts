@@ -37,8 +37,8 @@ export type ModalType = {
 
 // values
 export type ValuesType = {
-    stime: string | null,
-    etime: string | null,
+    stime: string | null | Date,
+    etime: string | null | Date,
     IDCard: string | null,
     conditions: number,
     phone: number,

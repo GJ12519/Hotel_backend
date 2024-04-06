@@ -159,7 +159,7 @@ function RouterCom(): JSX.Element {
           path="reception/order"
           element={
             <AuthNoPower>
-              <UserAdmin />
+              <OrderAdmin />
             </AuthNoPower>
           }
         />

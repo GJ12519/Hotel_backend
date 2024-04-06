@@ -65,14 +65,19 @@ export default {
 
             } catch (error) {
                 console.log(error);
-
                 message.error("网络错误，请重试");
             }
 
         },
         async checkin(data: ValuesType) {
             console.log('s');
-
+            try {
+                const res = await checkin(data)
+                console.log('哈哈哈2', res);
+                return res
+            } catch {
+                message.info('网络错误，请重试')
+            }
         }
     }),
 };
