@@ -49,8 +49,6 @@ const formItemLayout = {
 // ==================
 // 所需的组件
 // ==================
-import RoleTree from "@/components/TreeChose/RoleTree";
-
 // ==================
 // 类型声明
 // ==================
@@ -104,43 +102,18 @@ function GusAdminContainer(): JSX.Element {
         conditions: undefined, // 状态
     });
 
-    // 角色树相关参数
-    const [role, setRole] = useSetState<RoleTreeInfo>({
-        roleData: [],
-        roleTreeLoading: false,
-        roleTreeShow: false,
-        roleTreeDefault: [],
-    });
-
     // 生命周期 - 组件挂载时触发一次
     useMount(() => {
         onGetData(page);
-        getAllRolesData();
     });
-
-    // 函数 - 获取所有的角色数据，用于分配角色控件的原始数据
-    const getAllRolesData = async (): Promise<void> => {
-        try {
-            const res = await dispatch.sys.getAllRoles();
-
-            if (res && res.status === 200) {
-                setRole({
-                    roleData: res.data,
-                });
-            }
-        } catch {
-            //
-        }
-    };
 
     // 函数 - 查询当前页面所需列表数据
     async function onGetData(page: {
         pageNum: number;
         pageSize: number;
     }): Promise<void> {
-        if (!p.includes("user:query")) {
-            return;
-        }
+        // console.log('第几条数据开始', page.pageNum, '获取数量', page.pageSize);
+
 
         const params = {
             pageNum: page.pageNum,
@@ -151,16 +124,14 @@ function GusAdminContainer(): JSX.Element {
         setLoading(true);
         try {
             const res = await dispatch.guster.getguslist(tools.clearNull(params)) as any
-            console.log('所有用户的信息', res?.data);
-            const res11 = res?.data?.results?.result
+            console.log('所有用户的信息', res?.data?.results);
+            // const res11 = res?.data?.results?.result
 
             if (res && res.data.status === 200) {
-                console.log(res11, 111);
+                // console.log(res11, 111);
 
                 setData(res.data.results.result);
                 setPage({
-                    pageNum: page.pageNum,
-                    pageSize: page.pageSize,
                     total: res.data.results.total,
                 });
             } else {
@@ -187,7 +158,7 @@ function GusAdminContainer(): JSX.Element {
 
     // 搜索
     const onSearch = (): void => {
-        console.log('page', page);
+        // console.log('page', page);
 
         onGetData(page);
     };
@@ -201,14 +172,14 @@ function GusAdminContainer(): JSX.Element {
         data: TableRecordData | null,
         type: operateType
     ): void => {
-        console.log('查看data数据', data);
+        // console.log('查看data数据', data);
 
         setModal({
             modalShow: true,
             nowData: data,
             operateType: type,
         });
-        console.log(modal);
+        // console.log(modal);
 
         // 用setTimeout是因为首次让Modal出现时得等它挂载DOM，不然form对象还没来得及挂载到Form上
         setTimeout(() => {
@@ -216,7 +187,7 @@ function GusAdminContainer(): JSX.Element {
                 // 新增，需重置表单各控件的值
                 form.resetFields();
             } else if (data) {
-                console.log(data);
+                // console.log(data);
                 // 查看或修改，需设置表单各控件的值为当前所选中行的数据
                 form.setFieldsValue({
                     ...data,
@@ -233,7 +204,7 @@ function GusAdminContainer(): JSX.Element {
         }
         try {
             const values = await form.validateFields();
-            console.log('values', values, modal.operateType);
+            // console.log('values', values, modal.operateType);
 
             setModal({
                 modalLoading: true,
@@ -251,7 +222,7 @@ function GusAdminContainer(): JSX.Element {
             if (modal.operateType === "add") {
                 // 新增
                 try {
-                    const res: Res | undefined = await dispatch.guster.addGus(params) as any;
+                    const res: Res | undefined = await dispatch.guster.addGus(params);
                     if (res && res.status === 200) {
                         message.success("添加成功");
                         onGetData(page);
@@ -266,11 +237,11 @@ function GusAdminContainer(): JSX.Element {
                 }
             } else {
                 // 修改
-                console.log('jhfdshj', params);
-                console.log(';', modal?.nowData);
+                // console.log('jhfdshj', params);
+                // console.log(';', modal?.nowData);
 
                 params.ID = modal.nowData?.ID;
-                console.log('sadreasdfasdfas', params, modal.nowData);
+                // console.log('sadreasdfasdfas', params, modal.nowData);
 
                 try {
                     const res = await dispatch.guster.upGusmsg(params) as any;
@@ -292,22 +263,6 @@ function GusAdminContainer(): JSX.Element {
         }
     };
 
-    // 删除某一条数据
-    const onDel = async (id: number): Promise<void> => {
-        setLoading(true);
-        try {
-            const res = await dispatch.sys.delUser({ id });
-            if (res && res.status === 200) {
-                message.success("删除成功");
-                onGetData(page);
-            } else {
-                message.error(res?.message ?? "操作失败");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
     /** 模态框关闭 **/
     const onClose = () => {
         setModal({
@@ -317,7 +272,11 @@ function GusAdminContainer(): JSX.Element {
 
     // 表格页码改变
     const onTablePageChange = (pageNum: number, pageSize: number): void => {
-        console.log(pageNum, pageSize);
+        // console.log('yeeeee', pageNum, pageSize);
+        setPage({
+            pageNum: pageNum,
+            pageSize: pageSize,
+        });
         onGetData({ pageNum: pageNum * pageSize - pageSize + 1, pageSize });
     };
 
@@ -377,30 +336,28 @@ function GusAdminContainer(): JSX.Element {
             render: (v: null, record: TableRecordData) => {
                 const controls = [];
                 const u = userinfo.userBasicInfo || { EmployeeID: -1 };
-                p.includes("user:query") &&
-                    controls.push(
-                        <span
-                            key="0"
-                            className="control-btn green"
-                            onClick={() => onModalShow(record, "see")}
-                        >
-                            <Tooltip placement="top" title="查看">
-                                <EyeOutlined />
-                            </Tooltip>
-                        </span>
-                    );
-                p.includes("user:up") &&
-                    controls.push(
-                        <span
-                            key="1"
-                            className="control-btn blue"
-                            onClick={() => onModalShow(record, "up")}
-                        >
-                            <Tooltip placement="top" title="修改">
-                                <ToolOutlined />
-                            </Tooltip>
-                        </span>
-                    );
+                controls.push(
+                    <span
+                        key="0"
+                        className="control-btn green"
+                        onClick={() => onModalShow(record, "see")}
+                    >
+                        <Tooltip placement="top" title="查看">
+                            <EyeOutlined />
+                        </Tooltip>
+                    </span>
+                );
+                controls.push(
+                    <span
+                        key="1"
+                        className="control-btn blue"
+                        onClick={() => onModalShow(record, "up")}
+                    >
+                        <Tooltip placement="top" title="修改">
+                            <ToolOutlined />
+                        </Tooltip>
+                    </span>
+                );
 
                 const result: JSX.Element[] = [];
                 controls.forEach((item, index) => {
@@ -418,21 +375,6 @@ function GusAdminContainer(): JSX.Element {
     const tableData = useMemo(() => {
 
         return data.map((item, index) => {
-            // console.log('data22222', {
-            //     key: index,
-            //     name: item.Gus_name,
-            //     ID: item.Gus_id,
-            //     IDCard: item.IDCard,
-            //     // serial: index + 1 + (page.pageNum - 1) * page.pageSize,
-            //     // EmployeeName: item.EmployeeName,
-            //     Password: item.Gus_password,
-            //     sex: item.Gender,
-            //     Phone: item.Phone,
-            //     email: item.Email,
-            //     conditions: item.conditions,
-            //     control: item.conditions,
-            //     note: item.note
-            // });
 
             return {
                 key: index,
@@ -460,7 +402,7 @@ function GusAdminContainer(): JSX.Element {
                         <Button
                             type="primary"
                             icon={<PlusCircleOutlined />}
-                            disabled={!p.includes("user:add")}
+                            // disabled={!p.includes("user:add")}
                             onClick={() => onModalShow(null, "add")}
                         >
                             添加用户
@@ -468,7 +410,7 @@ function GusAdminContainer(): JSX.Element {
                     </li>
                 </ul>
                 <Divider type="vertical" />
-                {p.includes("user:query") && (
+                {(
                     <ul className="search-ul">
                         <li>
                             <Input
@@ -508,8 +450,8 @@ function GusAdminContainer(): JSX.Element {
                     dataSource={tableData}
                     pagination={{
                         total: page.total,
-                        current: page.pageNum,
-                        pageSize: page.pageSize,
+                        current: page.pageNum,  // 当前页码
+                        pageSize: page.pageSize,   // 每页显示数量
                         showTotal: (t) => `共 ${t} 条数据`,
                         onChange: onTablePageChange,
                     }}
@@ -577,6 +519,7 @@ function GusAdminContainer(): JSX.Element {
                         rules={[
                             { required: false, whitespace: true, message: "必填" },
                             { min: 6, message: "最少输入6位字符" },
+
                             // { max: 18, message: "最多输入18位字符" },
                         ]}
                     >

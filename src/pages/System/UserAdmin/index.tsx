@@ -46,6 +46,14 @@ const formItemLayout = {
   },
 };
 
+// 性别校验
+const validateGender = (rule, value) => {
+  if (!value || ['男', '女'].includes(value)) {
+    return Promise.resolve();
+  }
+  return Promise.reject(new Error('请输入男或女'));
+};
+
 // ==================
 // 所需的组件
 // ==================
@@ -122,11 +130,19 @@ function UserAdminContainer(): JSX.Element {
   const getAllRolesData = async (): Promise<void> => {
     try {
       const res = await dispatch.sys.getAllRoles();
+      console.log('rs555', res);
+      const res11 = res?.results.map(role => ({
+        ...role, // 复制原对象的所有属性  
+        title: role.RoleName, // 添加新的 title 属性，其值等于 RoleName
+      }))
 
       if (res && res.status === 200) {
+        // console.log('全部的数据吗？', res11, data);
+
         setRole({
-          roleData: res.data,
+          roleData: res11,
         });
+
       }
     } catch {
       //
@@ -138,9 +154,9 @@ function UserAdminContainer(): JSX.Element {
     pageNum: number;
     pageSize: number;
   }): Promise<void> {
-    if (!p.includes("user:query")) {
-      return;
-    }
+    // if (!p.includes("user:query")) {
+    //   return;
+    // }
 
     const params = {
       pageNum: page.pageNum,
@@ -160,8 +176,8 @@ function UserAdminContainer(): JSX.Element {
         setData(res.data.results.result);
 
         setPage({
-          pageNum: page.pageNum,
-          pageSize: page.pageSize,
+          // pageNum: page.pageNum,
+          // pageSize: page.pageSize,
           total: res.data.results.total,
         });
       } else {
@@ -205,16 +221,26 @@ function UserAdminContainer(): JSX.Element {
       nowData: data,
       operateType: type,
     });
+    console.log('userinbfo4545', userinfo, data);
+
     // 用setTimeout是因为首次让Modal出现时得等它挂载DOM，不然form对象还没来得及挂载到Form上
     setTimeout(() => {
       if (type === "add") {
         // 新增，需重置表单各控件的值
         form.resetFields();
       } else if (data) {
-        console.log(data);
+        console.log('dthh', data);
+        const stars = Array(12).fill('*').join('');
         // 查看或修改，需设置表单各控件的值为当前所选中行的数据
         form.setFieldsValue({
-          ...data,
+          name: data.name,
+          EmployeeName: data.EmployeeName,
+          password: data.Password.length <= 12 ? data.Password.replace(/./g, '*') : stars,
+          phone: data.Phone,
+          email: data.email,
+          desc: data.desc,
+          conditions: data.conditions,
+          address: data.address
         });
       }
     });
@@ -228,17 +254,27 @@ function UserAdminContainer(): JSX.Element {
     }
     try {
       const values = await form.validateFields();
+      console.log('465644', values);
+
+
       setModal({
         modalLoading: true,
       });
+
       const params: UserBasicInfoParam = {
-        username: values.username,
-        password: values.password,
-        phone: values.phone,
-        email: values.email,
-        desc: values.desc,
-        conditions: values.conditions,
+        name: values.name,  // 姓名
+        EmployeeName: values.EmployeeName,  // 用户名
+        Password: values.password,  // 密码
+        Phone: values.phone,  // 电话
+        email: values.email,  // 邮箱
+        note: values.desc,  // 备注
+        conditions: values.conditions,  //状态
+        gender: values.sex,  // 性别
+        address: values.address,  // 地址
+        IDCard: values.IDCard  // 身份证
       };
+      console.log(params);
+
       if (modal.operateType === "add") {
         // 新增
         try {
@@ -257,7 +293,7 @@ function UserAdminContainer(): JSX.Element {
         }
       } else {
         // 修改
-        params.id = modal.nowData?.id;
+        params.id = modal.nowData?.EmployeeID;
         try {
           const res: Res | undefined = await dispatch.sys.upUser(params);
           if (res && res.status === 200) {
@@ -279,8 +315,10 @@ function UserAdminContainer(): JSX.Element {
   };
 
   // 删除某一条数据
-  const onDel = async (id: number): Promise<void> => {
+  const onDel = async (id: string): Promise<void> => {
     setLoading(true);
+    console.log('删除的id', id);
+
     try {
       const res = await dispatch.sys.delUser({ id });
       if (res && res.status === 200) {
@@ -303,25 +341,40 @@ function UserAdminContainer(): JSX.Element {
 
   /** 分配角色按钮点击，角色控件出现 **/
   const onTreeShowClick = (record: TableRecordData): void => {
+    console.log('record1', record);
+
     setModal({
       nowData: record,
     });
     setRole({
-      roleTreeShow: true,
-      roleTreeDefault: record.roles || [],
+      roleTreeShow: true,  // 开启角色树
+      // roleTreeDefault: record.roles || [],
     });
   };
 
   // 分配角色确定
   const onRoleOk = async (keys: string[]): Promise<void> => {
-    if (!modal.nowData?.id) {
-      message.error("未获取到该条数据id");
-      return;
+    console.log('data12312321321', modal.nowData, keys);
+
+    // if (!modal.nowData?.RoleID) {
+    //   message.error("未获取到该条数据id");
+    //   return;
+    // }
+    if (keys.length === 0) {
+      keys = ''
+    } else {
+      keys = keys[0]
     }
+
+    console.log('keysss', keys);
+
+
     const params = {
-      id: modal.nowData.id,
-      roles: keys.map((item) => Number(item)),
+      id: modal.nowData.EmployeeID,
+      keys: keys,
     };
+    console.log('params', params);
+
     setRole({
       roleTreeLoading: true,
     });
@@ -351,6 +404,10 @@ function UserAdminContainer(): JSX.Element {
   // 表格页码改变
   const onTablePageChange = (pageNum: number, pageSize: number): void => {
     console.log(pageNum, pageSize);
+    setPage({
+      pageNum: pageNum,
+      pageSize: pageSize,
+    });
     onGetData({ pageNum: pageNum * pageSize - pageSize + 1, pageSize });
   };
 
@@ -391,9 +448,9 @@ function UserAdminContainer(): JSX.Element {
       key: "conditions",
       render: (v: number): JSX.Element =>
         v === 1 ? (
-          <span style={{ color: "green" }}>启用</span>
+          <span style={{ color: "green" }}>在职</span>
         ) : (
-          <span style={{ color: "red" }}>禁用</span>
+          <span style={{ color: "red" }}>离职</span>
         ),
     },
     {
@@ -428,6 +485,7 @@ function UserAdminContainer(): JSX.Element {
             </span>
           );
         p.includes("user:role") &&
+          u.EmployeeID !== record.EmployeeID &&
           controls.push(
             <span
               key="2"
@@ -440,23 +498,23 @@ function UserAdminContainer(): JSX.Element {
             </span>
           );
 
-        p.includes("user:del") &&
-          u.EmployeeID !== record.EmployeeID &&
-          controls.push(
-            <Popconfirm
-              key="3"
-              title="确定删除吗?"
-              onConfirm={() => onDel(record.EmployeeID as any)}
-              okText="确定"
-              cancelText="取消"
-            >
-              <span className="control-btn red">
-                <Tooltip placement="top" title="删除">
-                  <DeleteOutlined />
-                </Tooltip>
-              </span>
-            </Popconfirm>
-          );
+        // p.includes("user:del") &&
+        //   u.EmployeeID !== record.EmployeeID &&
+        //   controls.push(
+        //     <Popconfirm
+        //       key="3"
+        //       title="确定删除吗?"
+        //       onConfirm={() => onDel(record.EmployeeID as any)}
+        //       okText="确定"
+        //       cancelText="取消"
+        //     >
+        //       <span className="control-btn red">
+        //         <Tooltip placement="top" title="删除">
+        //           <DeleteOutlined />
+        //         </Tooltip>
+        //       </span>
+        //     </Popconfirm>
+        //   );
 
         const result: JSX.Element[] = [];
         controls.forEach((item, index) => {
@@ -474,19 +532,28 @@ function UserAdminContainer(): JSX.Element {
   const tableData = useMemo(() => {
 
     return data.map((item, index) => {
+      console.log('item的数据', item);
 
       return {
         key: index,
-        name: item.name,
-        EmployeeID: item.EmployeeID,
-        serial: index + 1 + (page.pageNum - 1) * page.pageSize,
-        EmployeeName: item.EmployeeName,
-        Password: item.Password,
-        Phone: item.Phone,
-        email: item.email,
-        conditions: item.conditions,
+        name: item.name,  // 姓名
+        EmployeeID: item.EmployeeID,  // id
+        // serial: index + 1 + (page.pageNum - 1) * page.pageSize,
+        EmployeeName: item.EmployeeName,  // 用户名
+        Password: item.Password,  // 密码
+        Phone: item.Phone,  // 电话
+        email: item.email,  // 邮箱
+        conditions: item.conditions,  // 状态
         control: item.conditions,
-        Position: item.Position
+        Position: item.Position,  // 职位
+        IDCard: item.IDCard,  // 身份证
+        Hiredate: item.HireDate,  // 出生日期
+        desc: item.Note,  // 描述
+        address: item.Address,  // 地址
+        RoleID: item.RoleID,
+        RoleName: item.RoleName,
+        descs: item.desc,
+        keys: item.keys
       }
     });
   }, [page, data]);
@@ -524,8 +591,8 @@ function UserAdminContainer(): JSX.Element {
                 onChange={searchConditionsChange}
                 value={searchInfo.conditions}
               >
-                <Option value={1}>启用</Option>
-                <Option value={-1}>禁用</Option>
+                <Option value={1}>在职</Option>
+                <Option value={-1}>离职</Option>
               </Select>
             </li>
             <li>
@@ -570,8 +637,8 @@ function UserAdminContainer(): JSX.Element {
           }}
         >
           <Form.Item
-            label="用户名"
-            name="username"
+            label="姓名"
+            name="name"
             {...formItemLayout}
             rules={[
               { required: true, whitespace: true, message: "必填" },
@@ -584,6 +651,32 @@ function UserAdminContainer(): JSX.Element {
             />
           </Form.Item>
           <Form.Item
+            label="用户名"
+            name="EmployeeName"
+            {...formItemLayout}
+            rules={[
+              { required: true, whitespace: true, message: "必填" },
+              { max: 12, message: "最多输入12位字符" },
+            ]}
+          >
+            <Input
+              placeholder="请输入用户名"
+              disabled={modal.operateType === "see"}
+            />
+          </Form.Item>
+          {modal.operateType === "add" && <Form.Item
+            label="性别"
+            name="sex"
+            {...formItemLayout}
+            rules={[
+              { validator: validateGender },
+            ]}
+          >
+            <Input
+              placeholder="请输入性别"
+            />
+          </Form.Item>}
+          <Form.Item
             label="密码"
             name="password"
             {...formItemLayout}
@@ -595,6 +688,7 @@ function UserAdminContainer(): JSX.Element {
           >
             <Input.Password
               placeholder="请输入密码"
+              visibilityToggle={false}
               disabled={modal.operateType === "see"}
             />
           </Form.Item>
@@ -603,6 +697,7 @@ function UserAdminContainer(): JSX.Element {
             name="phone"
             {...formItemLayout}
             rules={[
+              { required: true, whitespace: true, message: "必填" },
               () => ({
                 validator: (rule, value) => {
                   const v = value;
@@ -619,6 +714,42 @@ function UserAdminContainer(): JSX.Element {
             <Input
               placeholder="请输入手机号"
               maxLength={11}
+              disabled={modal.operateType === "see"}
+            />
+          </Form.Item>
+          {modal.operateType === "add" && <Form.Item
+            label="身份证"
+            name="IDCard"
+            {...formItemLayout}
+            rules={[
+              { required: true, whitespace: true, message: "必填" },
+              { max: 18 },
+              () => ({
+                validator: (rule, value) => {
+                  const v = value;
+                  if (v) {
+                    if (!tools.checkIDCard(v)) {
+                      return Promise.reject("请输入有效的身份证号码");
+                    }
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <Input
+              placeholder="请输入身份证号码"
+              disabled={modal.operateType === "see"}
+            />
+          </Form.Item>
+          }
+          <Form.Item
+            label="地址"
+            name="address"
+            {...formItemLayout}
+          >
+            <Input
+              placeholder="请添加居住地址"
               disabled={modal.operateType === "see"}
             />
           </Form.Item>
@@ -665,10 +796,10 @@ function UserAdminContainer(): JSX.Element {
           >
             <Select disabled={modal.operateType === "see"}>
               <Option key={1} value={1}>
-                启用
+                在职
               </Option>
               <Option key={-1} value={-1}>
-                禁用
+                离职
               </Option>
             </Select>
           </Form.Item>
@@ -679,7 +810,7 @@ function UserAdminContainer(): JSX.Element {
         title={"分配角色"}
         data={role.roleData}
         visible={role.roleTreeShow}
-        defaultKeys={role.roleTreeDefault}
+        // defaultKeys={modal.nowData}
         loading={role.roleTreeLoading}
         onOk={onRoleOk}
         onClose={onRoleClose}

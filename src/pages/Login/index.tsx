@@ -15,7 +15,7 @@ import Vcode from "react-vcode";
 import { Form, Input, Button, Checkbox, message } from "antd";
 import { UserOutlined, KeyOutlined } from "@ant-design/icons";
 import CanvasBack from "@/components/CanvasBack";
-import LogoImg from "@/assets/logo.png";
+import LogoImg from "@/assets/hotel.png";
 import { userlogin } from "@/server/modules/users_login";
 
 // ==================
@@ -148,11 +148,15 @@ function LoginContainer(): JSX.Element {
   const onSubmit = async (): Promise<void> => {
     try {
       const values = await form.validateFields();
+      console.log(values.vcode);
+      // if(values.vcode !== codeValue)
       setLoading(true);
       const res = await dispatch.app.onLogin({
         username: values.username,
         password: values.password,
       });
+      console.log(res);
+
       if (res && res.status == 200) {
         message.success("登录成功");
         navigate("/");
@@ -168,14 +172,14 @@ function LoginContainer(): JSX.Element {
           localStorage.removeItem("userLoginInfo");
         }
       } else {
+        console.log('8855res', res);
+
         message.error(res?.message ?? "登录失败")
       }
       setLoading(false);
     } catch (e) {
       // 验证未通过
-      message.error("查询失败，请重试！！！");
-      console.log(e);
-
+      message.error("验证码错误，请重新输入！！！");
       setLoading(false);
     }
   };

@@ -6,15 +6,17 @@ import app from "@/models/app";
 import sys from "@/models/sys";
 import guster from "@/models/guster";
 import room from "@/models/room";
+import order from "@/models/order";
 
 export interface RootModel extends Models<RootModel> {
   app: typeof app;
   sys: typeof sys;
   guster: typeof guster;
   room: typeof room;
+  order: typeof order
 }
 
-const rootModel: RootModel = { app, sys, guster, room };
+const rootModel: RootModel = { app, sys, guster, room, order };
 const store = init({
   models: rootModel,
   redux: {

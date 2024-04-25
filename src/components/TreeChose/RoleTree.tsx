@@ -17,10 +17,10 @@ type RoleLevel = Role & {
 interface Props {
   title: string; // 标题
   data: Role[]; //  原始数据
-  defaultKeys: number[]; // 当前默认选中的key们
+  // defaultKeys: number[]; // 当前默认选中的key们
   visible: boolean; // 是否显示
   loading: boolean; // 确定按钮是否在等待中状态
-  onOk: (keys: string[], role: Role[]) => Promise<void>; // 确定
+  onOk: (keys: string[]) => Promise<void>; // 确定
   onClose: () => void; // 关闭
 }
 
@@ -31,35 +31,37 @@ export default function RoleTreeComponent(props: Props): JSX.Element {
   const [nowKeys, setNowKeys] = useState<string[]>([]);
 
   useEffect(() => {
-    setNowKeys(props.defaultKeys.map((item) => `${item}`));
-  }, [props.defaultKeys]);
+    console.log('props', props);
+    // setNowKeys(props.defaultKeys.map((item) => `${item.keys}`));
+  });
 
   // 工具 - 递归将扁平数据转换为层级数据
-  const dataToJson = useCallback(
-    (one: RoleLevel | undefined, data: RoleLevel[]) => {
-      let kids;
-      if (!one) {
-        // 第1次递归
-        kids = data.filter((item: RoleLevel) => !item.parent);
-      } else {
-        kids = data.filter((item: RoleLevel) => item.parent?.id === one.id);
-      }
-      kids.forEach(
-        (item: RoleLevel) => (item.children = dataToJson(item, data))
-      );
-      return kids.length ? kids : undefined;
-    },
-    []
-  );
+  // const dataToJson = useCallback(
+  //   (one: RoleLevel | undefined, data: RoleLevel[]) => {
+  //     let kids;
+  //     if (!one) {
+  //       // 第1次递归
+  //       kids = data.filter((item: RoleLevel) => !item.parent);
+  //     } else {
+  //       kids = data.filter((item: RoleLevel) => item.parent?.id === one.id);
+  //     }
+  //     kids.forEach(
+  //       (item: RoleLevel) => (item.children = dataToJson(item, data))
+  //     );
+  //     return kids.length ? kids : undefined;
+  //   },
+  //   []
+  // );
 
   // 点击确定时触发
   const onOk = useCallback(() => {
     // 通过key返回指定的数据
-    const res = props.data.filter((item) => {
-      return nowKeys.includes(`${item.id}`);
-    });
+    // const res = props.data.filter((item) => {
+    //   return nowKeys.includes(`${item.id}`);
+    // });
+
     // 返回选中的keys和选中的具体数据
-    props.onOk && props.onOk(nowKeys, res);
+    props.onOk && props.onOk(nowKeys);
   }, [props, nowKeys]);
 
   // 点击关闭时触发
@@ -69,6 +71,11 @@ export default function RoleTreeComponent(props: Props): JSX.Element {
 
   // 选中或取消选中时触发
   const onCheck = useCallback((keys: any) => {
+    console.log('keys', keys);
+    // console.log('nowkeys', nowKeys);
+    // const aa = props.defaultKeys.map(item => item)?
+    // console.log('11', aa);
+
     setNowKeys(keys);
   }, []);
 
@@ -94,17 +101,17 @@ export default function RoleTreeComponent(props: Props): JSX.Element {
   }, []);
 
   // 处理原始数据，将原始数据处理为层级关系
-  const sourceData = useMemo(() => {
-    const roleData: Role[] = cloneDeep(props.data);
+  // const sourceData = useMemo(() => {
+  //   const roleData: Role[] = cloneDeep(props.data);
 
-    // 这应该递归，把children数据也赋值key
-    const d: RoleLevel[] = makeKey(roleData);
+  //   // 这应该递归，把children数据也赋值key
+  //   const d: RoleLevel[] = makeKey(roleData);
 
-    d.forEach((item) => {
-      item.key = String(item.id);
-    });
-    return dataToJson(undefined, d) || [];
-  }, [props.data, dataToJson]);
+  //   d.forEach((item) => {
+  //     item.key = String(item.id);
+  //   });
+  //   return dataToJson(undefined, d) || [];
+  // }, [props.data, dataToJson]);
 
   return (
     <Modal
@@ -120,7 +127,8 @@ export default function RoleTreeComponent(props: Props): JSX.Element {
         selectable={false}
         checkedKeys={nowKeys}
         onCheck={onCheck}
-        treeData={sourceData}
+        treeData={props.data}
+      // multiple={false}
       />
     </Modal>
   );

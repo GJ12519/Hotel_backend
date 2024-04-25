@@ -12,7 +12,7 @@ interface Props {
 export default function FooterCom(props: Props) {
   return (
     <Footer className={`footer ${props.className}`}>
-      © 2018-{new Date().getFullYear() + " "}
+      {/* © 2018-{new Date().getFullYear() + " "}
       <a
         href="https://blog.isluo.com"
         target="_blank"
@@ -20,7 +20,8 @@ export default function FooterCom(props: Props) {
       >
         blog.isluo.com
       </a>
-      , Inc.
+      , Inc. */}
+      酒店客房管理系统
     </Footer>
   );
 }

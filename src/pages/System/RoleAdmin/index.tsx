@@ -90,7 +90,7 @@ function RoleAdminContainer() {
   // 分页相关参数控制
   const [page, setPage] = useSetState<Page>({
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
 
@@ -103,28 +103,28 @@ function RoleAdminContainer() {
   });
 
   // 搜索相关参数
-  const [searchInfo, setSearchInfo] = useSetState<SearchInfo>({
-    title: undefined, // 角色名
-    conditions: undefined, // 状态
-  });
+  // const [searchInfo, setSearchInfo] = useSetState<SearchInfo>({
+  //   title: undefined, // 角色名
+  //   conditions: undefined, // 状态
+  // });
 
   // 权限树相关参数
-  const [power, setPower] = useSetState<PowerTreeInfo>({
-    treeOnOkLoading: false,
-    powerTreeShow: false,
-    powerTreeDefault: { menus: [], powers: [] },
-  });
+  // const [power, setPower] = useSetState<PowerTreeInfo>({
+  //   treeOnOkLoading: false,
+  //   powerTreeShow: false,
+  //   powerTreeDefault: { menus: [], powers: [] },
+  // });
 
   // 生命周期 - 首次加载组件时触发
   useMount(() => {
     getData(page);
-    getPowerTreeData();
+    // getPowerTreeData();
   });
 
   // 函数 - 获取所有的菜单权限数据，用于分配权限控件的原始数据
-  const getPowerTreeData = () => {
-    dispatch.sys.getAllMenusAndPowers();
-  };
+  // const getPowerTreeData = () => {
+  //   dispatch.sys.getAllMenusAndPowers();
+  // };
 
   // 函数- 查询当前页面所需列表数据
   const getData = async (page: { pageNum: number; pageSize: number }) => {
@@ -134,18 +134,18 @@ function RoleAdminContainer() {
     const params = {
       pageNum: page.pageNum,
       pageSize: page.pageSize,
-      title: searchInfo.title,
-      conditions: searchInfo.conditions,
     };
     setLoading(true);
     try {
-      const res: Res = await dispatch.sys.getRoles(tools.clearNull(params));
+      const res = await dispatch.sys.getRoles(tools.clearNull(params));
+      console.log('获取到的角色数据', res?.results);
+
       if (res && res.status === 200) {
-        setData(res.data.list);
+        setData(res.results);
         setPage({
           total: res.data.total,
-          pageNum: page.pageNum,
-          pageSize: page.pageSize,
+          // pageNum: page.pageNum,
+          // pageSize: page.pageSize,
         });
       } else {
         message.error(res?.message ?? "获取失败");
@@ -156,21 +156,21 @@ function RoleAdminContainer() {
   };
 
   // 搜索 - 名称输入框值改变时触发
-  const searchTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length < 20) {
-      setSearchInfo({ title: e.target.value });
-    }
-  };
+  // const searchTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.value.length < 20) {
+  //     setSearchInfo({ title: e.target.value });
+  //   }
+  // };
 
   // 搜索 - 状态下拉框选择时触发
-  const searchConditionsChange = (v: number) => {
-    setSearchInfo({ conditions: v });
-  };
+  // const searchConditionsChange = (v: number) => {
+  //   setSearchInfo({ conditions: v });
+  // };
 
-  // 搜索
-  const onSearch = () => {
-    getData(page);
-  };
+  // // 搜索
+  // const onSearch = () => {
+  //   getData(page);
+  // };
 
   /**
    * 添加/修改/查看 模态框出现
@@ -183,17 +183,20 @@ function RoleAdminContainer() {
       nowData: data,
       operateType: type,
     });
+    console.log('....', data);
+
     setTimeout(() => {
       if (type === "add") {
         // 新增，需重置表单各控件的值
         form.resetFields();
       } else {
+        console.log('465465', data);
         // 查看或修改，需设置表单各控件的值为当前所选中行的数据
         form.setFieldsValue({
           formConditions: data?.conditions,
           formDesc: data?.desc,
-          formSorts: data?.sorts,
-          formTitle: data?.title,
+          // formSorts: data?.sorts,
+          formTitle: data?.RoleName,
         });
       }
     });
@@ -211,65 +214,59 @@ function RoleAdminContainer() {
       setModal({
         modalLoading: true,
       });
-      const params: RoleParam = {
-        title: values.formTitle,
+      const params: {
+        RoleName: string,
+        conditions: number,
+        desc: string,
+        id: number
+      } = {
+        RoleName: values.formTitle,
         desc: values.formDesc,
-        sorts: values.formSorts,
+        // sorts: values.formSorts,
         conditions: values.formConditions,
+        id: modal?.nowData?.id
       };
-      if (modal.operateType === "add") {
-        // 新增
-        try {
-          const res: Res = await dispatch.sys.addRole(params);
-          if (res && res.status === 200) {
-            message.success("添加成功");
-            getData(page);
-            dispatch.app.updateUserInfo(null); // 角色信息有变化，立即更新当前用户信息
-            onClose();
-          }
-        } finally {
-          setModal({
-            modalLoading: false,
-          });
+      // 修改
+      // params.id = ;
+      try {
+        console.log('paramssss', params);
+
+        const res: Res = await dispatch.sys.upRole(params);
+        console.log(res);
+
+        if (res && res.status === 200) {
+          message.success("修改成功");
+          getData(page);
+          dispatch.app.updateUserInfo(null);
+          onClose();
         }
-      } else {
-        // 修改
-        params.id = modal?.nowData?.id;
-        try {
-          const res: Res = await dispatch.sys.upRole(params);
-          if (res && res.status === 200) {
-            message.success("修改成功");
-            getData(page);
-            dispatch.app.updateUserInfo(null);
-            onClose();
-          }
-        } finally {
-          setModal({
-            modalLoading: false,
-          });
-        }
+      } finally {
+        setModal({
+          modalLoading: false,
+        });
       }
+
     } catch {
       // 未通过校验
     }
   };
 
   // 删除某一条数据
-  const onDel = async (id: number) => {
-    setLoading(true);
-    try {
-      const res = await dispatch.sys.delRole({ id });
-      if (res && res.status === 200) {
-        message.success("删除成功");
-        getData(page);
-        dispatch.app.updateUserInfo(null);
-      } else {
-        message.error(res?.message ?? "操作失败");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const onDel = async (id: number) => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await dispatch.sys.delRole({ id });
+  //     if (res && res.status === 200) {
+  //       message.success("删除成功");
+  //       getData(page);
+  //       dispatch.app.updateUserInfo(null);
+  //     } else {
+  //       message.error(res?.message ?? "操作失败");
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   /** 模态框关闭 **/
   const onClose = () => {
@@ -277,56 +274,60 @@ function RoleAdminContainer() {
   };
 
   /** 分配权限按钮点击，权限控件出现 **/
-  const onAllotPowerClick = (record: TableRecordData) => {
-    const menus = record.menuAndPowers.map((item) => item.menuId); // 需默认选中的菜单项ID
-    // 需默认选中的权限ID
-    const powers = record.menuAndPowers.reduce(
-      (v1, v2) => [...v1, ...v2.powers],
-      [] as number[]
-    );
-    setModal({ nowData: record });
-    setPower({
-      powerTreeShow: true,
-      powerTreeDefault: { menus, powers },
-    });
-  };
+  // const onAllotPowerClick = (record: TableRecordData) => {
+  //   const menus = record.menuAndPowers.map((item) => item.menuId); // 需默认选中的菜单项ID
+  //   // 需默认选中的权限ID
+  //   const powers = record.menuAndPowers.reduce(
+  //     (v1, v2) => [...v1, ...v2.powers],
+  //     [] as number[]
+  //   );
+  //   setModal({ nowData: record });
+  //   setPower({
+  //     powerTreeShow: true,
+  //     powerTreeDefault: { menus, powers },
+  //   });
+  // };
 
   // 权限树确定 给角色分配菜单和权限
-  const onPowerTreeOk = async (arr: PowerTreeDefault) => {
-    if (!modal?.nowData?.id) {
-      message.error("该数据没有ID");
-      return;
-    }
-    const params = {
-      id: modal.nowData.id,
-      menus: arr.menus,
-      powers: arr.powers,
-    };
+  // const onPowerTreeOk = async (arr: PowerTreeDefault) => {
+  //   if (!modal?.nowData?.id) {
+  //     message.error("该数据没有ID");
+  //     return;
+  //   }
+  //   const params = {
+  //     id: modal.nowData.id,
+  //     menus: arr.menus,
+  //     powers: arr.powers,
+  //   };
 
-    setPower({ treeOnOkLoading: true });
-    try {
-      const res: Res = await dispatch.sys.setPowersByRoleId(params);
-      if (res && res.status === 200) {
-        getData(page);
-        dispatch.app.updateUserInfo(null);
-        onPowerTreeClose();
-      } else {
-        message.error(res?.message ?? "权限分配失败");
-      }
-    } finally {
-      setPower({ treeOnOkLoading: false });
-    }
-  };
+  //   setPower({ treeOnOkLoading: true });
+  //   try {
+  //     const res: Res = await dispatch.sys.setPowersByRoleId(params);
+  //     if (res && res.status === 200) {
+  //       getData(page);
+  //       dispatch.app.updateUserInfo(null);
+  //       onPowerTreeClose();
+  //     } else {
+  //       message.error(res?.message ?? "权限分配失败");
+  //     }
+  //   } finally {
+  //     setPower({ treeOnOkLoading: false });
+  //   }
+  // };
 
   // 关闭菜单树
-  const onPowerTreeClose = () => {
-    setPower({
-      powerTreeShow: false,
-    });
-  };
+  // const onPowerTreeClose = () => {
+  //   setPower({
+  //     powerTreeShow: false,
+  //   });
+  // };
 
   // 表单页码改变
   const onTablePageChange = (pageNum: number, pageSize: number | undefined) => {
+    setPage({
+      pageNum: pageNum,
+      pageSize: pageSize
+    })
     getData({ pageNum, pageSize: pageSize || page.pageSize });
   };
 
@@ -334,23 +335,18 @@ function RoleAdminContainer() {
   const tableColumns = [
     {
       title: "序号",
-      dataIndex: "serial",
-      key: "serial",
+      dataIndex: "id",
+      key: "id",
     },
     {
       title: "角色名",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "RoleName",
+      key: "RoleName",
     },
     {
       title: "描述",
       dataIndex: "desc",
       key: "desc",
-    },
-    {
-      title: "排序",
-      dataIndex: "sorts",
-      key: "sorts",
     },
     {
       title: "状态",
@@ -393,34 +389,18 @@ function RoleAdminContainer() {
               </Tooltip>
             </span>
           );
-        p.includes("role:power") &&
-          controls.push(
-            <span
-              key="2"
-              className="control-btn blue"
-              onClick={() => onAllotPowerClick(record)}
-            >
-              <Tooltip placement="top" title="分配权限">
-                <EditOutlined />
-              </Tooltip>
-            </span>
-          );
-        p.includes("role:del") &&
-          controls.push(
-            <Popconfirm
-              key="3"
-              title="确定删除吗?"
-              onConfirm={() => onDel(record.id)}
-              okText="确定"
-              cancelText="取消"
-            >
-              <span className="control-btn red">
-                <Tooltip placement="top" title="删除">
-                  <DeleteOutlined />
-                </Tooltip>
-              </span>
-            </Popconfirm>
-          );
+        // p.includes("role:power") &&
+        //   controls.push(
+        //     <span
+        //       key="2"
+        //       className="control-btn blue"
+        //       onClick={() => onAllotPowerClick(record)}
+        //     >
+        //       <Tooltip placement="top" title="分配权限">
+        //         <EditOutlined />
+        //       </Tooltip>
+        //     </span>
+        //   );
 
         const result: JSX.Element[] = [];
         controls.forEach((item, index) => {
@@ -436,36 +416,25 @@ function RoleAdminContainer() {
 
   const tableData = useMemo(() => {
     return data.map((item, index): TableRecordData => {
+      console.log(item);
+
       return {
         key: index,
-        id: item.id,
-        serial: index + 1 + (page.pageNum - 1) * page.pageSize,
-        title: item.title,
+        id: item.RoleID,
+        // serial: index + 1 + (page.pageNum - 1) * page.pageSize,
+        RoleName: item.RoleName,
         desc: item.desc,
         sorts: item.sorts,
         conditions: item.conditions,
-        control: item.id,
-        menuAndPowers: item.menuAndPowers,
+        // control: item.id,
+        // menuAndPowers: item.menuAndPowers,
       };
     });
   }, [page, data]);
 
   return (
     <div>
-      <div className="g-search">
-        <ul className="search-func">
-          <li>
-            <Button
-              type="primary"
-              icon={<PlusCircleOutlined />}
-              disabled={!p.includes("role:add")}
-              onClick={() => onModalShow(null, "add")}
-            >
-              添加角色
-            </Button>
-          </li>
-        </ul>
-        <Divider type="vertical" />
+      {/* <div className="g-search">
         {p.includes("role:query") && (
           <ul className="search-ul">
             <li>
@@ -498,7 +467,7 @@ function RoleAdminContainer() {
             </li>
           </ul>
         )}
-      </div>
+      </div> */}
       <div className="diy-table">
         <Table
           columns={tableColumns}
@@ -539,7 +508,7 @@ function RoleAdminContainer() {
           >
             <Input
               placeholder="请输入角色名"
-              disabled={modal.operateType === "see"}
+              disabled={modal.operateType === "see" || modal?.nowData?.id === 1}
             />
           </Form.Item>
           <Form.Item
@@ -550,11 +519,11 @@ function RoleAdminContainer() {
           >
             <TextArea
               rows={4}
-              disabled={modal.operateType === "see"}
+              disabled={modal.operateType === "see" || modal?.nowData?.id === 1}
               autoSize={{ minRows: 2, maxRows: 6 }}
             />
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             label="排序"
             name="formSorts"
             {...formItemLayout}
@@ -566,14 +535,14 @@ function RoleAdminContainer() {
               style={{ width: "100%" }}
               disabled={modal.operateType === "see"}
             />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             label="状态"
             name="formConditions"
             {...formItemLayout}
             rules={[{ required: true, message: "请选择状态" }]}
           >
-            <Select disabled={modal.operateType === "see"}>
+            <Select disabled={modal.operateType === "see" || modal?.nowData?.id === 1}>
               <Option key={1} value={1}>
                 启用
               </Option>
@@ -584,7 +553,7 @@ function RoleAdminContainer() {
           </Form.Item>
         </Form>
       </Modal>
-      <PowerTreeCom
+      {/* <PowerTreeCom
         title={modal.nowData ? `分配权限：${modal.nowData.title}` : "分配权限"}
         data={powerTreeData}
         defaultChecked={power.powerTreeDefault}
@@ -592,8 +561,8 @@ function RoleAdminContainer() {
         modalShow={power.powerTreeShow}
         onOk={onPowerTreeOk}
         onClose={onPowerTreeClose}
-      />
-    </div>
+      /> */}
+    </div >
   );
 }
 

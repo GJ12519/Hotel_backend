@@ -1,5 +1,4 @@
 /** User 系统管理/`客房`管理 **/
-
 // ==================
 // 所需的第三方库
 // ==================
@@ -196,9 +195,6 @@ function RoomAdminContainer(): JSX.Element {
         // 获取values并对数据进行处理
         const values = await form.validateFields();
         console.log('2222', values.btime);
-        console.log('1111');
-
-
         const Atime = {
             stime: moment(values.btime[0]._d).format('YYYY-MM-DD HH:mm:ss'),
             etime: moment(values.btime[1]._d).format('YYYY-MM-DD HH:mm:ss')
@@ -213,12 +209,28 @@ function RoomAdminContainer(): JSX.Element {
                 message.info('待完善')
             } else if (modal.operateType === "Reserve") {
                 const ReserveRes = await dispatch.room.reserve(rest)
+                console.log('ReserveRes', ReserveRes);
+
+                if (ReserveRes && ReserveRes.status === 200) {
+                    console.log('ReserveRes', ReserveRes);
+
+                    message.info(`${Room[num].room_id}操作成功`)
+                } else {
+                    message.error(`账号存在问题，请查明`)
+                }
                 console.log('reserve', ReserveRes);
             } else if (modal.operateType === "clean") {
                 message.info('待完善')
             }
             else if (modal.operateType === "Checkin") {
                 const CheckinRes = await dispatch.room.checkin(rest)
+                if (CheckinRes && CheckinRes.status === 200) {
+                    console.log('ReserveRes', CheckinRes);
+
+                    message.info(`${Room[num].room_id}操作成功`)
+                } else {
+                    message.error(`账号存在问题，请查明`)
+                }
                 console.log(CheckinRes);
             }
         } catch {

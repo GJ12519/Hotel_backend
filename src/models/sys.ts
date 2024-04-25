@@ -20,7 +20,7 @@ import {
   UserBasicInfoParam,
 } from "./index.type";
 
-import { getuserlist } from "@/server/modules/getalluser";
+import { getuserlist, addHUse, upHUser, delUsers, getRole, upHRole, getrrole, addRole } from "@/server/modules/getalluser";
 
 const defaultState: SysState = {
   menus: [], // 所有的菜单信息（用于菜单管理，无视权限）
@@ -146,11 +146,14 @@ export default {
     /** 获取所有角色 **/
     async getAllRoles(): Promise<Res> {
       try {
-        const res: Res = await axios.get("/api/getAllRoles");
+        const res: Res = await getrrole()
+        // const res: Res = await axios.get("/api/getAllRoles");
+        console.log('roleresss', res?.data.results);
+
         if (res && res.status === 200) {
-          dispatch.sys.reducerSetRoles(res.data);
+          dispatch.sys.reducerSetRoles(res.data.results);
         }
-        return res;
+        return res?.data;
       } catch (err) {
         message.error("网络错误，请重试");
       }
@@ -198,17 +201,17 @@ export default {
     /**
      * 分页查询角色数据
      * **/
-    async getRoles(params: {
+    async getRoles(data: {
       pageNum: number;
       pageSize: number;
-      title?: string;
-      conditions?: number;
     }) {
       try {
-        const res: Res = await axios.get(
-          `/api/getroles?${qs.stringify(params)}`
-        );
-        return res;
+        console.log(data);
+
+        const res: Res = await getRole(data)
+        console.log(res);
+
+        return res?.data;
       } catch (err) {
         message.error("网络错误，请重试");
       }
@@ -245,9 +248,14 @@ export default {
     /**
      * 修改角色
      * **/
-    async upRole(params: RoleParam) {
+    async upRole(data: {
+      RoleName: string,
+      conditions: number,
+      desc: string,
+      id: number
+    }) {
       try {
-        const res: Res = await axios.post("/api/uprole", params);
+        const res: Res = await upHRole(data)
         return res;
       } catch (err) {
         message.error("网络错误，请重试");
@@ -360,9 +368,11 @@ export default {
     /**
      * 添加用户
      * **/
-    async addUser(params: UserBasicInfoParam) {
+    async addUser(data: UserBasicInfoParam) {
       try {
-        const res: Res = await axios.post("/api/addUser", params);
+        const res: Res = await addHUse(data);
+        console.log(res);
+
         return res;
       } catch (err) {
         message.error("网络错误，请重试");
@@ -373,11 +383,13 @@ export default {
     /**
      * 修改用户
      * **/
-    async upUser(params: UserBasicInfoParam) {
-      console.log("params", params);
+    async upUser(data: UserBasicInfoParam) {
+      console.log("params", data);
 
       try {
-        const res: Res = await axios.post("/api/upUser", params);
+        const res: Res = await upHUser(data)
+        console.log(res);
+
         return res;
       } catch (err) {
         message.error("网络错误，请重试");
@@ -388,9 +400,11 @@ export default {
     /**
      * 删除用户
      * **/
-    async delUser(params: { id: number }) {
+    async delUser(data: { id: string }) {
       try {
-        const res: Res = await axios.post("/api/delUser", params);
+        const res: Res = await delUsers(data)
+        console.log(res);
+
         return res;
       } catch (err) {
         message.error("网络错误，请重试");
@@ -402,9 +416,11 @@ export default {
      * 给用户分配角色
      * 用的也是upUser接口
      * **/
-    async setUserRoles(params: { id: number; roles: number[] }) {
+    async setUserRoles(data: { id: string; roles: number[] }) {
       try {
-        const res: Res = await axios.post("/api/upUser", params);
+        const res = await addRole(data)
+        console.log(res);
+
         return res;
       } catch (err) {
         message.error("网络错误，请重试");

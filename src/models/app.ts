@@ -62,11 +62,10 @@ export default {
       //这里是直接调用的接口
       try {
         const userinfo: UserInfo = rootState.app.userinfo;
-        // console.log("这是userinfo的信息", userinfo);
-
-        /* 此处强加类型断言，后续需要再来修改 */
-        const res: Res = await userlogin(params) as any
+        const res: Res = await userlogin(params)
         const results = res?.data.users
+        console.log(results);
+
         // console.log("axios返回的信息", res);
 
         /* 保存用户信息 */
@@ -78,7 +77,7 @@ export default {
         await dispatch.app.updateUserInfo(null)
         return res?.data
       } catch (err) {
-        message.error("网络错误，请重试");
+        // message.error("网络错误，请重试");
       }
       return;
     },
@@ -117,8 +116,10 @@ export default {
       const userinfo: UserInfo = rootState.app.userinfo;
       const ID = userinfo.userBasicInfo?.EmployeeID
       const userID = { userID: ID }
+      console.log(userID.userID);
 
-      if (userID) {
+      if (userID.userID) {
+
         const roles = await getrole(userID as any)
         // 获取角色的ID
         const RoleID = { RoleID: roles.data?.results[0].RoleID }

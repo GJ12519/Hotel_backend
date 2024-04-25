@@ -189,6 +189,52 @@ const tools = {
     }
     return temp as T;
   },
+  /* 时间处理，不足半天按半天算，超过半天按一天算 */
+  calculateDaysDifference(inputTimeString: string): number {
+    const inputTime = new Date(inputTimeString);
+    const now = new Date();
+    const diffInMilliseconds = now - inputTime;
+    const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24)); // 完整的天数  
+    const remainingMilliseconds = diffInMilliseconds % (1000 * 60 * 60 * 24); // 剩余毫秒数  
+    const remainingHours = Math.floor(remainingMilliseconds / (1000 * 60 * 60)); // 剩余小时数  
+
+    let days = diffInDays;
+
+    // 如果剩余小时数大于半天（12小时），则增加一天  
+    if (remainingHours >= 12) {
+      days += 1;
+    }
+    // 如果剩余小时数大于等于半天的一半（6小时），则增加半天  
+    else if (remainingHours >= 6) {
+      days += 0.5;
+    }
+
+    return days;
+  },
+
+  // 预定时间段的加减
+  comparisontime(stime: string, etime: string): number {
+    const Stime = new Date(stime);
+    const Etime = new Date(etime);
+    const diffInMilliseconds = Etime - Stime;
+    const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24)); // 完整的天数  
+    const remainingMilliseconds = diffInMilliseconds % (1000 * 60 * 60 * 24); // 剩余毫秒数  
+    const remainingHours = Math.floor(remainingMilliseconds / (1000 * 60 * 60)); // 剩余小时数  
+
+    let days = diffInDays;
+
+    // 如果剩余小时数大于半天（12小时），则增加一天  
+    if (remainingHours >= 12) {
+      days += 1;
+    }
+    // 如果剩余小时数大于等于半天的一半（6小时），则增加半天  
+    else if (remainingHours >= 6) {
+      days += 0.5;
+    }
+
+    return days;
+  }
 };
+
 
 export default tools;

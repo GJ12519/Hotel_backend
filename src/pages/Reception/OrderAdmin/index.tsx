@@ -1,9 +1,646 @@
-import React from "react";
+/** User 系统管理/`客户`管理 **/
 
-function OrderAdminContainer(): JSX.Element {
+// ==================
+// 所需的第三方库
+// ==================
+import React, { useState, useMemo } from "react";
+import { useSetState, useMount } from "react-use";
+import { useSelector, useDispatch } from "react-redux";
+import moment from "moment";
+import {
+    Form,
+    Button,
+    Input,
+    Table,
+    message,
+    Popconfirm,
+    Modal,
+    Tooltip,
+    Divider,
+    Select,
+} from "antd";
+import {
+    EyeOutlined,
+    EditOutlined,
+    ToolOutlined,
+    DeleteOutlined,
+    PlusCircleOutlined,
+    SearchOutlined,
+} from "@ant-design/icons";
+
+// ==================
+// 所需的自定义的东西
+// ==================
+import tools from "@/util/tools"; // 工具函数
+
+const { TextArea } = Input;
+const { Option } = Select;
+
+const formItemLayout = {
+    labelCol: {
+        xs: { span: 24 },
+        sm: { span: 4 },
+    },
+    wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 19 },
+    },
+};
+
+// ==================
+// 所需的组件
+// ==================
+
+// ==================
+// 类型声明
+// ==================
+import {
+    TableOrderData,
+    Page,
+    operateType,
+    ModalType
+} from "./index.type";
+import { RootState, Dispatch } from "@/store";
+
+// ==================
+// CSS
+// ==================
+// import "./index.less";
+
+// ==================
+// 本组件
+// ==================
+function GusAdminContainer(): JSX.Element {
+    const dispatch = useDispatch<Dispatch>();
+    const userinfo = useSelector((state: RootState) => state.app.userinfo);
+    const p = useSelector((state: RootState) => state.app.powersCode);
+
+    const [form] = Form.useForm();
+    const [data, setData] = useState<TableOrderData[]>([]); // 当前页面列表数据
+    const [loading, setLoading] = useState(false); // 数据是否正在加载中
+
+    // 分页相关参数
+    const [page, setPage] = useSetState<Page>({
+        pageNum: 1,
+        pageSize: 5,
+        total: 0,
+    });
+
+    // 样式
+    const wrapper = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
+
+    // 模态框相关参数
+    const [modal, setModal] = useSetState<ModalType>({
+        operateType: "add", // see查看，add添加，up修改
+        nowData: null,
+        modalShow: false,
+        modalLoading: false,
+    });
+
+    // 搜索相关参数
+    const [searchInfo, setSearchInfo] = useSetState<SearchInfo>({
+        username: undefined, // 用户名
+        conditions: undefined, // 状态
+    });
+
+    // 生命周期 - 组件挂载时触发一次
+    useMount(() => {
+        onGetData(page);
+    });
+
+    // 函数 - 查询当前页面所需列表数据
+    async function onGetData(page: {
+        pageNum: number;
+        pageSize: number;
+    }): Promise<void> {
+        const params = {
+            pageNum: page.pageNum,
+            pageSize: page.pageSize,
+            name: searchInfo.username,
+            conditions: searchInfo.conditions,
+        };
+        setLoading(true);
+        try {
+            const res = await dispatch.order.getOrder(tools.clearNull(params)) as any
+            console.log('所有订单的信息', res);
+            const res11 = res?.results?.result
+
+            if (res && res.status === 200) {
+                // console.log(res11, 111);
+
+                setData(res11);
+                setPage({
+                    total: res.results.total,
+                });
+                // console.log('1', data);
+            } else {
+                message.error(res?.message ?? "数据获取失败");
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // 搜索 - 名称输入框值改变时触发
+    const searchUsernameChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ): void => {
+        if (e.target.value.length < 20) {
+            setSearchInfo({ username: e.target.value });
+        }
+    };
+
+    // 搜索 - 状态下拉框选择时触发
+    const searchConditionsChange = (v: number): void => {
+        setSearchInfo({ conditions: v });
+    };
+
+    // 搜索
+    const onSearch = (): void => {
+        // console.log('page', page);
+
+        onGetData(page);
+    };
+
+    /**
+     * 添加/修改/查看 模态框出现
+     * @param data 当前选中的那条数据
+     * @param type add添加/up修改/see查看
+     * **/
+    const onModalShow = (
+        data: TableOrderData | null,
+        type: operateType
+    ): void => {
+        // console.log('查看data数据', data);
+
+        setModal({
+            modalShow: true,
+            nowData: data,
+            operateType: type,
+        });
+        // console.log(modal);
+
+        // 用setTimeout是因为首次让Modal出现时得等它挂载DOM，不然form对象还没来得及挂载到Form上
+        setTimeout(() => {
+            // 查看或修改，需设置表单各控件的值为当前所选中行的数据
+            form.setFieldsValue({
+                ...data,
+            });
+        });
+    };
+
+    /** 模态框确定 **/
+    const onOk = async (): Promise<void> => {
+        if (modal.operateType === "see") {
+            onClose();
+            return;
+        }
+        try {
+            const values = await form.validateFields();
+            // console.log('values', values, modal.operateType);
+
+            setModal({
+                modalLoading: true,
+            });
+            const params: TableOrderData = {
+                name: values.name,
+                Password: values.Password,
+                Phone: values.Phone,
+                email: values.email,
+                IDCard: values.IDCard,
+                note: values.note,
+                sex: values.sex,
+                conditions: values.conditions,
+            };
+            if (modal.operateType === "add") {
+                // 新增
+                try {
+                    const res: Res | undefined = await dispatch.guster.addGus(params) as any;
+                    if (res && res.status === 200) {
+                        message.success("添加成功");
+                        onGetData(page);
+                        onClose();
+                    } else {
+                        message.error(res?.message ?? "操作失败");
+                    }
+                } finally {
+                    setModal({
+                        modalLoading: false,
+                    });
+                }
+            } else {
+                // 修改
+                // console.log('jhfdshj', params);
+                // console.log(';', modal?.nowData);
+
+                params.ID = modal.nowData?.ID;
+                // console.log('sadreasdfasdfas', params, modal.nowData);
+
+                try {
+                    const res = await dispatch.guster.upGusmsg(params) as any;
+                    if (res && res.status === 200) {
+                        message.success("修改成功");
+                        onGetData(page);
+                        onClose();
+                    } else {
+                        message.error(res?.message ?? "操作失败");
+                    }
+                } finally {
+                    setModal({
+                        modalLoading: false,
+                    });
+                }
+            }
+        } catch {
+            // 未通过校验
+        }
+    };
+
+
+    /** 模态框关闭 **/
+    const onClose = () => {
+        setModal({
+            modalShow: false,
+        });
+    };
+
+    // 表格页码改变
+    const onTablePageChange = (pageNum: number, pageSize: number): void => {
+        // console.log(pageNum, pageSize);
+        setPage({
+            pageNum: pageNum
+        })
+        onGetData({ pageNum: pageNum * pageSize - pageSize + 1, pageSize });
+    };
+
+    // ==================
+    // 属性 和 memo
+    // ==================
+
+    // table字段
+    const tableColumns = [
+        {
+            title: "订单号",
+            dataIndex: "ID",
+            key: "ID",
+            align: 'center'
+        },
+        {
+            title: "房号",
+            dataIndex: "room",
+            key: "room",
+            align: 'center'
+        },
+        // {
+        //     title: "房型",
+        //     dataIndex: "roomtype",
+        //     key: "roomtype",
+        //     align: 'center'
+        // },
+        {
+            title: "姓名",
+            dataIndex: "name",
+            key: "name",
+            align: 'center'
+        },
+        {
+            title: "身份证",
+            dataIndex: "IDCard",
+            key: "IDCard",
+            align: 'center',
+        },
+        {
+            title: "电话",
+            dataIndex: "phone",
+            key: "phone",
+            align: 'center',
+        },
+        {
+            title: "预定信息",
+            dataIndex: "time",
+            key: "time",
+            align: 'center',
+            render: (text: string, record: any) => {
+                return (
+                    <div style={wrapper}>
+                        <span>{record.roomtype}</span>
+                        <span>{record.stime}-{record.etime}</span>
+                    </div>
+                )
+            }
+        },
+        {
+            title: "已住天数",
+            dataIndex: "datatime",
+            key: "datatime",
+            align: 'center',
+            render: (text: string, record: TableOrderData) => {
+                // console.log('record', record);
+                return record.isable === 0 ? '未入住' : tools.calculateDaysDifference(record.stime)
+            }
+        },
+        {
+            title: "预计总价",
+            dataIndex: "prices",
+            key: "prices",
+            align: 'center',
+        },
+        {
+            title: "状态",
+            dataIndex: "isable",
+            key: "isable",
+            render: (v: number) => {
+                if (v === 0) {
+                    return <span style={{ color: "#e1de1a" }}>预定中</span>
+                } else if (v === 1) {
+                    return <span style={{ color: "#2bc700dd" }}>入住中</span>
+                } else if (v === 2) {
+                    return <span>已完成</span>
+                } else if (v === -1) {
+                    return <span>取消预订</span>
+                }
+            },
+            align: 'center'
+        },
+        // {
+        //     title: "操作",
+        //     key: "control",
+        //     width: 100,
+        //     align: 'center',
+        //     render: (v: null, record: TableOrderData) => {
+        //         const controls = [];
+        //         // const u = userinfo.userBasicInfo || { EmployeeID: -1 };
+        //         controls.push(
+        //             <span
+        //                 key="0"
+        //                 className="control-btn green"
+        //                 onClick={() => onModalShow(record, "see")}
+        //             >
+        //                 <Tooltip placement="top" title="查看">
+        //                     <EyeOutlined />
+        //                 </Tooltip>
+        //             </span>
+        //         );
+        //         const result: JSX.Element[] = [];
+        //         controls.forEach((item, index) => {
+        //             if (index) {
+        //                 result.push(<Divider key={`line${index}`} type="vertical" />);
+        //             }
+        //             result.push(item);
+        //         });
+        //         return result;
+        //     },
+        // },
+    ];
+
+    // table列表所需数据
+    const tableData = useMemo(() => {
+
+        return data.map((item, index) => {
+            // console.log('item1', item);
+            return {
+                key: index,
+                name: item.Gus_name,
+                ID: item.order_id,
+                IDCard: item.IDCard,
+                createtime: item.createtime,
+                time: moment(item.createtime).format('YYYY-MM-DD HH:mm'),
+                room: item.room_id,
+                roomtype: item.type_name,
+                // serial: index + 1 + (page.pageNum - 1) * page.pageSize,
+                phone: item.Phone,
+                isable: item.isable,
+                // control: item.conditions,
+                note: item.note,
+                // stime1: item.stime,      // 预定入住时间
+                stime: moment(item.stime).format('YYYY-MM-DD'),
+                etime: moment(item.etime).format('YYYY-MM-DD'),         // 预定截至时间
+                datatime: tools.calculateDaysDifference(item.stime),        // 居住天数
+                prices: item.price * tools.comparisontime(item.stime, item.etime)
+            }
+        });
+    }, [page, data]);
+
     return (
-        <div>订单管理</div>
-    )
+        <div>
+            <div className="g-search">
+                {/* <Divider type="vertical" /> */}
+                {(
+                    <ul className="search-ul">
+                        <li>
+                            <Input
+                                placeholder="预定人/订单号"
+                                onChange={searchUsernameChange}
+                                value={searchInfo.username}
+                            />
+                        </li>
+                        <li>
+                            <Select
+                                placeholder="状态"
+                                allowClear
+                                style={{ width: "200px" }}
+                                onChange={searchConditionsChange}
+                                value={searchInfo.conditions}
+                            >
+                                <Option value={0}>预定中</Option>
+                                <Option value={1}>入住中</Option>
+                                <Option value={2}>已完成</Option>
+                                <Option value={-1}>取消预订</Option>
+                            </Select>
+                        </li>
+                        <li>
+                            <Button
+                                type="primary"
+                                icon={<SearchOutlined />}
+                                onClick={onSearch}
+                            >
+                                搜索
+                            </Button>
+                        </li>
+                    </ul>
+                )}
+            </div>
+            <div className="diy-table">
+                <Table
+                    columns={tableColumns}
+                    loading={loading}
+                    dataSource={tableData}
+                    pagination={{
+                        total: page.total,
+                        current: page.pageNum,
+                        pageSize: page.pageSize,
+                        showTotal: (t) => `共 ${t} 条数据`,
+                        onChange: onTablePageChange,
+                    }}
+                />
+            </div>
+
+            {/* 新增&修改&查看 模态框 */}
+            <Modal
+                title={{ add: "新增", up: "修改", see: "查看" }[modal.operateType]}
+                visible={modal.modalShow}
+                onOk={onOk}
+                onCancel={onClose}
+                confirmLoading={modal.modalLoading}
+            >
+                <Form
+                    form={form}
+                    initialValues={{
+                        conditions: 1,
+                    }}
+                    disabled={true}
+                >
+                    <Form.Item
+                        label="姓名"
+                        name="name"
+                        {...formItemLayout}
+                        rules={[
+                            { required: true, whitespace: true, message: "必填" },
+                            { max: 12, message: "最多输入12位字符" },
+                        ]}
+                    >
+                        <Input
+                            placeholder="请输入用户名"
+                            disabled={modal.operateType === "see"}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="身份证"
+                        name="IDCard"
+                        {...formItemLayout}
+                        rules={[
+                            { required: true, whitespace: true, message: "必填" },
+                            { max: 18 },
+                            () => ({
+                                validator: (rule, value) => {
+                                    const v = value;
+                                    if (v) {
+                                        if (!tools.checkIDCard(v)) {
+                                            return Promise.reject("请输入有效的身份证号码");
+                                        }
+                                    }
+                                    return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input
+                            placeholder="请输入身份证号码"
+                            disabled={modal.operateType === "see"}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="密码"
+                        name="Password"
+                        {...formItemLayout}
+                        rules={[
+                            { required: false, whitespace: true, message: "必填" },
+                            { min: 6, message: "最少输入6位字符" },
+                            // { max: 18, message: "最多输入18位字符" },
+                        ]}
+                    >
+                        <Input.Password
+                            placeholder="初始密码123456"
+                            disabled={true}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="性别"
+                        name="sex"
+                        {...formItemLayout}
+                        rules={[
+                            { max: 3, message: "最多输入3位字符" },
+                        ]}
+                    >
+                        <Input
+                            placeholder="请输入性别"
+                            disabled={modal.operateType === "see"}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="电话"
+                        name="Phone"
+                        {...formItemLayout}
+                        rules={[
+                            { required: true, whitespace: true, message: "必填" },
+                            () => ({
+                                validator: (rule, value) => {
+                                    const v = value;
+                                    if (v) {
+                                        if (!tools.checkPhone(v)) {
+                                            return Promise.reject("请输入有效的手机号码");
+                                        }
+                                    }
+                                    return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input
+                            placeholder="请输入手机号"
+                            maxLength={11}
+                            disabled={modal.operateType === "see"}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="邮箱"
+                        name="email"
+                        {...formItemLayout}
+                        rules={[
+                            () => ({
+                                validator: (rule, value) => {
+                                    const v = value;
+                                    if (v) {
+                                        if (!tools.checkEmail(v)) {
+                                            return Promise.reject("请输入有效的邮箱地址");
+                                        }
+                                    }
+                                    return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input
+                            placeholder="请输入邮箱地址"
+                            disabled={modal.operateType === "see"}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="描述"
+                        name="note"
+                        {...formItemLayout}
+                        rules={[{ max: 100, message: "最多输入100个字符" }]}
+                    >
+                        <TextArea
+                            rows={4}
+                            disabled={modal.operateType === "see"}
+                            autoSize={{ minRows: 2, maxRows: 6 }}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="状态"
+                        name="conditions"
+                        {...formItemLayout}
+                        rules={[{ required: true, message: "请选择状态" }]}
+                    >
+                        <Select disabled={modal.operateType === "see"}>
+                            <Option key={1} value={1}>
+                                启用
+                            </Option>
+                            <Option key={-1} value={-1}>
+                                禁用
+                            </Option>
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>
+    );
 }
 
-export default OrderAdminContainer;
+export default GusAdminContainer;

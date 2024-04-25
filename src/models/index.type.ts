@@ -39,7 +39,8 @@ export interface RoleParam {
 // 角色对象
 export interface Role extends RoleParam {
   id: number; // ID
-  menuAndPowers: MenuAndPower[]; // 当前角色拥有的菜单id和权限id
+  // menuAndPowers: MenuAndPower[]; // 当前角色拥有的菜单id和权限id
+  RoleName: string
 }
 
 // 权限添加修改时的参数类型
@@ -85,6 +86,7 @@ export interface UserBasicInfo {
 
 // 添加修改用户时参数的数据类型
 export interface UserBasicInfoParam {
+  username: string,
   ID: string;
   IDCard?: string; // 身份证
   sex: string; // 性别

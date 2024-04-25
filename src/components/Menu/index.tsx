@@ -14,8 +14,11 @@ const { Sider } = Layout;
 // 自定义的东西
 // ==================
 import "./index.less";
-import ImgLogo from "@/assets/logo.png";
+import ImgLogo from "@/assets/hotel.png";
 import Icon from "@/components/Icon";
+import Icon_All from "@/util/icon";
+
+// import icon
 
 // ==================
 // 类型声明
@@ -86,7 +89,7 @@ export default function MenuCom(props: Props): JSX.Element {
           label:
             !item.ParentMenuID && item.Menu_icon ? (
               <span>
-                <Icon type={item.Menu_icon} />
+                <Icon_All type={item.Menu_icon} />
                 <span>{item.MenuName}</span>
               </span>
             ) : (

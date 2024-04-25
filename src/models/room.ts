@@ -23,22 +23,22 @@ export default {
     state: defaultState,
     reducers: {
         // 保存所有用户信息
-        getgusmsg(state: GusState, payload: GusMsg.List[]): GusState {
+        reduceRoomMsg(state: GusState, payload: GusMsg.List[]): GusState {
             return { ...state, gusmsg: payload };
         },
     },
 
     effects: (dispatch: Dispatch) => ({
         /**
-         * 条件分页查询所有客户信息
+         * 条件分页查询所有房间及租客的信息
          * **/
         async getroommsg() {
             try {
                 const res = await getRoomMsg();
                 if (res) {
-                    console.log('所有客户信息', res?.data?.results);
-                    const result = res?.data?.results
-                    console.log(result);
+                    console.log('所有租客的信息', res?.data?.results);
+                    // const result = res?.data?.results
+                    // console.log(result);
 
                     return res.data;
                 }
@@ -57,11 +57,11 @@ export default {
             }
         },
         async reserve(data: ValuesType) {
-            console.log('s');
+            // console.log('s');
             try {
                 const res = await reserve(data)
                 console.log('哈哈哈', res);
-                return res
+                return res.data
 
             } catch (error) {
                 console.log(error);
@@ -70,7 +70,7 @@ export default {
 
         },
         async checkin(data: ValuesType) {
-            console.log('s');
+            // console.log('s');
             try {
                 const res = await checkin(data)
                 console.log('哈哈哈2', res);

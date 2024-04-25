@@ -19,7 +19,7 @@ export type TableRecordData = {
   Password: string; // 密码
   Phone: string | number; // 手机
   email?: string; // 邮箱
-  note: string; // 描述
+  Note: string; // 描述
   conditions: number; // 是否启用 1启用 -1禁用
   control?: number; // 控制，传入的ID
   roles?: number[]; // 拥有的所有权限ID

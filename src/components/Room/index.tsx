@@ -7,8 +7,6 @@ import Icon_All from "@/util/icon";
 import { RoomWrapper } from "./style";
 import { useSetState, useMount } from "react-use";
 
-
-
 interface Props {
     itemdata?: any;
     handleRoomClick?: any;
