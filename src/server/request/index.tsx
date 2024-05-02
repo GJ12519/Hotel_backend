@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance } from "axios";
 import { HYRequestConfig } from "./type";
+import { useNavigate } from 'react-router-dom'; // 假设你使用的是react-router-dom 
 
 class HYRequest {
     instance: AxiosInstance;
@@ -12,6 +13,10 @@ class HYRequest {
         /* 请求拦截 */
         this.instance.interceptors.request.use(config => {
             // console.log('全局请求成功的拦截');
+            const token = localStorage.getItem('token')
+            if (token) {
+                config.headers.Authorization = `${token}`;
+            }
             return config
         }, err => {
             console.log('全局请求拦截失败');
@@ -22,8 +27,16 @@ class HYRequest {
             // console.log('全局响应成功的拦截');
             return res
         }, err => {
-            console.log('全局响应失败的拦截');
-            return err
+            const { response } = err;
+            if (response && response.status === 401) {
+                // 401错误处理逻辑  
+                const navigate = useNavigate();
+                // 清除token或执行其他逻辑  
+                // ...  
+                // 重定向到登录页面  
+                navigate('/login');
+            }
+            return Promise.reject(err);
         })
 
         /* 针对特定的hyrequest实例添加拦截器 */
@@ -39,6 +52,7 @@ class HYRequest {
 
     /* 封装网络请求的方法 */
     request<T = any>(config: HYRequestConfig<T>) {
+
         config.headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }

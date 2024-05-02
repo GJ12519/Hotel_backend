@@ -41,6 +41,7 @@ function BasicLayoutCom(): JSX.Element {
   const onLogout = () => {
     dispatch.app.onLogout().then(() => {
       message.success("退出成功");
+      localStorage.removeItem("token")
       navigate("/user/login");
     });
   };

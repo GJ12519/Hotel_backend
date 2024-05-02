@@ -71,78 +71,7 @@ function LoginContainer(): JSX.Element {
     setShow(true);
   }, [form]);
 
-  /**
-   * 执行登录
-   * 这里模拟：
-   * 1.登录，得到用户信息
-   * 2.通过用户信息获取其拥有的所有角色信息
-   * 3.通过角色信息获取其拥有的所有权限信息
-   * **/
-  // const loginIn = useCallback(
-  //   async (username: string, password: string) => {
-  //     let userBasicInfo: UserBasicInfo | null = null;
-  //     let roles: Role[] = [];
-  //     let menus: Menu[] = [];
-  //     let powers: Power[] = [];
 
-  //     /** 1.登录 （返回信息中有该用户拥有的角色id） **/
-  //     const res1: Res | undefined = await dispatch.app.onLogin({
-  //       username,
-  //       password,
-  //     });
-  //     if (!res1 || res1.status !== 200 || !res1.data) {
-  //       // 登录失败
-  //       return res1;
-  //     }
-
-  //     userBasicInfo = res1.data;
-
-  //     /** 2.根据角色id获取角色信息 (角色信息中有该角色拥有的菜单id和权限id) **/
-  //     const res2 = await dispatch.sys.getRoleById({
-  //       id: (userBasicInfo as UserBasicInfo).roles,
-  //     });
-  //     if (!res2 || res2.status !== 200) {
-  //       // 角色查询失败
-  //       return res2;
-  //     }
-
-  //     roles = res2.data.filter((item: Role) => item.conditions === 1); // conditions: 1启用 -1禁用
-
-  //     /** 3.根据菜单id 获取菜单信息 **/
-  //     const menuAndPowers = roles.reduce(
-  //       (a, b) => [...a, ...b.menuAndPowers],
-  //       [] as MenuAndPower[]
-  //     );
-  //     const res3 = await dispatch.sys.getMenusById({
-  //       id: Array.from(new Set(menuAndPowers.map((item) => item.menuId))),
-  //     });
-  //     if (!res3 || res3.status !== 200) {
-  //       // 查询菜单信息失败
-  //       return res3;
-  //     }
-
-  //     menus = res3.data.filter((item: Menu) => item.conditions === 1);
-
-  //     /** 4.根据权限id，获取权限信息 **/
-  //     const res4 = await dispatch.sys.getPowerById({
-  //       id: Array.from(
-  //         new Set(
-  //           menuAndPowers.reduce(
-  //             (a, b: MenuAndPower) => [...a, ...b.powers],
-  //             [] as number[]
-  //           )
-  //         )
-  //       ),
-  //     });
-  //     if (!res4 || res4.status !== 200) {
-  //       // 权限查询失败
-  //       return res4;
-  //     }
-  //     powers = res4.data.filter((item: Power) => item.conditions === 1);
-  //     return { status: 200, data: { userBasicInfo, roles, menus, powers } };
-  //   },
-  //   [dispatch.sys, dispatch.app]
-  // );
 
   // 用户提交登录
   const onSubmit = async (): Promise<void> => {
@@ -159,6 +88,9 @@ function LoginContainer(): JSX.Element {
 
       if (res && res.status == 200) {
         message.success("登录成功");
+        localStorage.setItem("token",
+          res.token
+        );
         navigate("/");
         // 是否记住密码
         if (rememberPassword) {
